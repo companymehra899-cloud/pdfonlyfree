@@ -330,6 +330,8 @@
         let pagePreviewCache = [];
         let pagesToDelete = new Set();
         let reorderDragIndex = null;
+        let mergeDragIndex = null;
+        const mergeThumbCache = new Map();
         let currentLang = 'en';
 
         const translations = {
@@ -347,6 +349,7 @@
                 'search.placeholder': 'Search tools... (Ctrl+K)',
                 'ws.chooseFile': 'Choose File', 'ws.chooseFiles': 'Choose Files', 'ws.selectFile': 'Select file to begin processing', 'ws.selected': '{n} file(s) selected', 'ws.changeFile': 'Change file',
                 'ws.dragTitle': 'Drag & drop your files here', 'ws.dragSub': 'or click to browse — your files stay 100% private',
+                'ws.mergeTitle': 'Files to merge', 'ws.mergeHint': 'Drag cards to reorder',
                 'alert.noFile': 'Please upload/select at least one file to process.', 'alert.processed': 'Processing completed successfully!', 'alert.error': 'An error occurred during file processing: ',
                 'tool.pdf-merge.title': 'Merge PDFs', 'tool.pdf-merge.desc': 'Combine multiple PDF files into one ordered document.',
                 'tool.pdf-split.title': 'Split PDF', 'tool.pdf-split.desc': 'Separate PDF pages or extract page ranges easily.',
@@ -392,6 +395,7 @@
                 'search.placeholder': 'ابحث عن الأدوات... (Ctrl+K)',
                 'ws.chooseFile': 'اختر ملفًا', 'ws.chooseFiles': 'اختر ملفات', 'ws.selectFile': 'اختر ملفًا للبدء', 'ws.selected': 'تم اختيار {n} ملف', 'ws.changeFile': 'تغيير الملف',
                 'ws.dragTitle': 'اسحب وأفلت ملفاتك هنا', 'ws.dragSub': 'أو انقر للتصفح — تبقى ملفاتك خاصة 100%',
+                'ws.mergeTitle': 'الملفات المراد دمجها', 'ws.mergeHint': 'اسحب البطاقات لإعادة الترتيب',
                 'alert.noFile': 'الرجاء رفع/اختيار ملف واحد على الأقل.', 'alert.processed': 'تمت المعالجة بنجاح!', 'alert.error': 'حدث خطأ أثناء معالجة الملف: ',
                 'tool.pdf-merge.title': 'دمج ملفات PDF', 'tool.pdf-merge.desc': 'اجمع عدة ملفات PDF في مستند واحد مرتّب.',
                 'tool.pdf-split.title': 'تقسيم PDF', 'tool.pdf-split.desc': 'افصل صفحات PDF أو استخرج نطاقات الصفحات بسهولة.',
@@ -437,6 +441,7 @@
                 'search.placeholder': 'Rechercher des outils... (Ctrl+K)',
                 'ws.chooseFile': 'Choisir un fichier', 'ws.chooseFiles': 'Choisir des fichiers', 'ws.selectFile': 'Sélectionnez un fichier pour commencer', 'ws.selected': '{n} fichier(s) sélectionné(s)', 'ws.changeFile': 'Changer de fichier',
                 'ws.dragTitle': 'Glissez-déposez vos fichiers ici', 'ws.dragSub': 'ou cliquez pour parcourir — vos fichiers restent 100% privés',
+                'ws.mergeTitle': 'Fichiers à fusionner', 'ws.mergeHint': 'Glissez les cartes pour réordonner',
                 'alert.noFile': 'Veuillez importer/sélectionner au moins un fichier.', 'alert.processed': 'Traitement terminé avec succès !', 'alert.error': 'Une erreur est survenue lors du traitement : ',
                 'tool.pdf-merge.title': 'Fusionner des PDF', 'tool.pdf-merge.desc': 'Combinez plusieurs fichiers PDF en un seul document ordonné.',
                 'tool.pdf-split.title': 'Diviser un PDF', 'tool.pdf-split.desc': 'Séparez les pages PDF ou extrayez facilement des plages.',
@@ -482,6 +487,7 @@
                 'search.placeholder': 'Buscar herramientas... (Ctrl+K)',
                 'ws.chooseFile': 'Elegir archivo', 'ws.chooseFiles': 'Elegir archivos', 'ws.selectFile': 'Selecciona un archivo para empezar', 'ws.selected': '{n} archivo(s) seleccionado(s)', 'ws.changeFile': 'Cambiar archivo',
                 'ws.dragTitle': 'Arrastra y suelta tus archivos aquí', 'ws.dragSub': 'o haz clic para explorar — tus archivos siguen siendo 100% privados',
+                'ws.mergeTitle': 'Archivos para unir', 'ws.mergeHint': 'Arrastra las tarjetas para reordenar',
                 'alert.noFile': 'Sube o selecciona al menos un archivo.', 'alert.processed': '¡Procesamiento completado con éxito!', 'alert.error': 'Ocurrió un error al procesar el archivo: ',
                 'tool.pdf-merge.title': 'Unir PDF', 'tool.pdf-merge.desc': 'Combina varios archivos PDF en un solo documento ordenado.',
                 'tool.pdf-split.title': 'Dividir PDF', 'tool.pdf-split.desc': 'Separa páginas PDF o extrae rangos fácilmente.',
@@ -527,6 +533,7 @@
                 'search.placeholder': 'Tools suchen... (Ctrl+K)',
                 'ws.chooseFile': 'Datei wählen', 'ws.chooseFiles': 'Dateien wählen', 'ws.selectFile': 'Datei zum Starten auswählen', 'ws.selected': '{n} Datei(en) ausgewählt', 'ws.changeFile': 'Datei ändern',
                 'ws.dragTitle': 'Dateien hierher ziehen und ablegen', 'ws.dragSub': 'oder klicken zum Durchsuchen — Dateien bleiben 100% privat',
+                'ws.mergeTitle': 'Zusammenzuführende Dateien', 'ws.mergeHint': 'Karten ziehen zum Neuordnen',
                 'alert.noFile': 'Bitte mindestens eine Datei hochladen/auswählen.', 'alert.processed': 'Verarbeitung erfolgreich abgeschlossen!', 'alert.error': 'Beim Verarbeiten der Datei ist ein Fehler aufgetreten: ',
                 'tool.pdf-merge.title': 'PDFs zusammenführen', 'tool.pdf-merge.desc': 'Fassen Sie mehrere PDFs zu einem geordneten Dokument zusammen.',
                 'tool.pdf-split.title': 'PDF teilen', 'tool.pdf-split.desc': 'Trennen Sie PDF-Seiten oder extrahieren Sie Seitenbereiche.',
@@ -572,6 +579,7 @@
                 'search.placeholder': 'Zoek tools... (Ctrl+K)',
                 'ws.chooseFile': 'Bestand kiezen', 'ws.chooseFiles': 'Bestanden kiezen', 'ws.selectFile': 'Selecteer een bestand om te beginnen', 'ws.selected': '{n} bestand(en) geselecteerd', 'ws.changeFile': 'Bestand wijzigen',
                 'ws.dragTitle': 'Sleep je bestanden hierheen', 'ws.dragSub': 'of klik om te bladeren — bestanden blijven 100% privé',
+                'ws.mergeTitle': 'Bestanden om samen te voegen', 'ws.mergeHint': 'Sleep kaarten om te herordenen',
                 'alert.noFile': 'Upload/selecteer ten minste één bestand.', 'alert.processed': 'Verwerking succesvol afgerond!', 'alert.error': 'Er is een fout opgetreden bij het verwerken: ',
                 'tool.pdf-merge.title': 'PDF’s samenvoegen', 'tool.pdf-merge.desc': 'Combineer meerdere PDF-bestanden tot één geordend document.',
                 'tool.pdf-split.title': 'PDF splitsen', 'tool.pdf-split.desc': 'Splits PDF-pagina’s of extraheer eenvoudig paginabereiken.',
@@ -883,6 +891,7 @@
             pagePreviewCache = [];
             pagesToDelete = new Set();
             reorderDragIndex = null;
+            mergeDragIndex = null;
         }
 
         function renderWorkspaceBody() {
@@ -919,19 +928,23 @@
                 `;
                 body.appendChild(fileUploadBox);
 
-                // Display selected file list pill previews
+                // Display selected files: draggable cards for Merge PDF, pills otherwise
                 if (hasFiles) {
-                    const fileListDiv = document.createElement('div');
-                    fileListDiv.className = "flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 bg-slate-100 dark:bg-slate-900 rounded-lg";
-                    loadedFiles.forEach((f, idx) => {
-                        fileListDiv.innerHTML += `
-                            <span class="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300">
-                                <i class="fa-solid fa-file text-blue-500"></i> ${f.name} (${(f.size/1024).toFixed(1)} KB)
-                                <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 cursor-pointer" onclick="removeWorkspaceFile(${idx})"></i>
-                            </span>
-                        `;
-                    });
-                    body.appendChild(fileListDiv);
+                    if (activeTool.id === 'pdf-merge') {
+                        renderMergeFileGrid(body);
+                    } else {
+                        const fileListDiv = document.createElement('div');
+                        fileListDiv.className = "flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 bg-slate-100 dark:bg-slate-900 rounded-lg";
+                        loadedFiles.forEach((f, idx) => {
+                            fileListDiv.innerHTML += `
+                                <span class="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    <i class="fa-solid fa-file text-blue-500"></i> ${f.name} (${(f.size/1024).toFixed(1)} KB)
+                                    <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 cursor-pointer" onclick="removeWorkspaceFile(${idx})"></i>
+                                </span>
+                            `;
+                        });
+                        body.appendChild(fileListDiv);
+                    }
                 }
             } else {
                 // Compact file bar for page-preview tools (upload box hidden after upload)
@@ -1137,6 +1150,123 @@
         function removeWorkspaceFile(index) {
             loadedFiles.splice(index, 1);
             renderWorkspaceBody();
+        }
+
+        function renderMergeFileGrid(container) {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = `
+                <div class="flex items-center justify-between mb-2 gap-2">
+                    <span class="text-sm font-medium text-slate-700 dark:text-slate-300">${t('ws.mergeTitle')} (${loadedFiles.length})</span>
+                    <span class="hidden md:inline text-xs text-slate-400"><i class="fa-solid fa-arrows-up-down-left-right mr-1"></i>${t('ws.mergeHint')}</span>
+                </div>
+            `;
+            const grid = document.createElement('div');
+            grid.id = 'mergeFileGrid';
+            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3 p-3 bg-slate-100 dark:bg-slate-900 rounded-lg min-h-[120px]';
+            wrap.appendChild(grid);
+            container.appendChild(wrap);
+            renderMergeCards();
+        }
+
+        async function getMergeThumb(file) {
+            if (mergeThumbCache.has(file)) return mergeThumbCache.get(file);
+            let url = '';
+            try {
+                const buf = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 0.45 });
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(viewport.width));
+                canvas.height = Math.max(1, Math.round(viewport.height));
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                url = canvas.toDataURL('image/jpeg', 0.72);
+            } catch (e) {
+                url = '';
+            }
+            mergeThumbCache.set(file, url);
+            return url;
+        }
+
+        function isDesktopPointer() {
+            return window.matchMedia('(pointer: fine)').matches && window.matchMedia('(min-width: 768px)').matches;
+        }
+
+        function renderMergeCards() {
+            const grid = document.getElementById('mergeFileGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const canDrag = isDesktopPointer();
+            loadedFiles.forEach((file, idx) => {
+                const card = document.createElement('div');
+                card.className = 'page-preview-card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden shadow-sm';
+                card.dataset.index = String(idx);
+                if (canDrag) {
+                    card.draggable = true;
+                    card.title = t('ws.mergeHint');
+                    card.addEventListener('dragstart', onMergeDragStart);
+                    card.addEventListener('dragover', onMergeDragOver);
+                    card.addEventListener('dragleave', onMergeDragLeave);
+                    card.addEventListener('drop', onMergeDrop);
+                    card.addEventListener('dragend', onMergeDragEnd);
+                }
+                card.innerHTML = `
+                    <div class="relative bg-slate-200 dark:bg-slate-700 aspect-[3/4] flex items-center justify-center overflow-hidden pointer-events-none">
+                        <i class="fa-solid fa-file-pdf text-slate-300 dark:text-slate-600 text-2xl"></i>
+                        <img class="thumb absolute inset-0 w-full h-full object-contain bg-white hidden" alt="${file.name}">
+                    </div>
+                    <span class="absolute top-1 left-1 w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>
+                    <button type="button" onclick="event.stopPropagation(); removeWorkspaceFile(${idx})" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 dark:bg-slate-900/90 text-slate-500 hover:text-red-500 shadow flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                    <div class="px-2 py-1.5">
+                        <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 truncate" title="${file.name}">${file.name}</p>
+                        <p class="text-[10px] text-slate-400">${(file.size/1024).toFixed(1)} KB</p>
+                    </div>
+                `;
+                card.classList.add('relative');
+                grid.appendChild(card);
+                getMergeThumb(file).then(url => {
+                    if (!url) return;
+                    const img = card.querySelector('img.thumb');
+                    if (img) { img.src = url; img.classList.remove('hidden'); }
+                });
+            });
+        }
+
+        function onMergeDragStart(e) {
+            mergeDragIndex = parseInt(e.currentTarget.dataset.index, 10);
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            try { e.dataTransfer.setData('text/plain', String(mergeDragIndex)); } catch (err) {}
+        }
+
+        function onMergeDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function onMergeDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function onMergeDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            const targetIndex = parseInt(e.currentTarget.dataset.index, 10);
+            if (mergeDragIndex === null || Number.isNaN(targetIndex) || mergeDragIndex === targetIndex) return;
+            const moved = loadedFiles.splice(mergeDragIndex, 1)[0];
+            if (!moved) return;
+            loadedFiles.splice(targetIndex, 0, moved);
+            mergeDragIndex = null;
+            renderMergeCards();
+        }
+
+        function onMergeDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('#mergeFileGrid .page-preview-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+            mergeDragIndex = null;
         }
 
         function setTargetKB(kb, fromSlider = false) {
