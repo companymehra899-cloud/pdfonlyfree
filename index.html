@@ -37,7 +37,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        (function () {
+            var workerUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            try {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob(
+                    ["importScripts('" + workerUrl + "');"],
+                    { type: 'application/javascript' }
+                ));
+            } catch (e) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+            }
+        })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
@@ -326,6 +336,7 @@
         let loadedFiles = [];
         let canvasOverlay = null;
         let signatureCtx = null;
+        let signatureDrawn = false;
         let reorderPageOrder = [];
         let pagePreviewCache = [];
         let pagesToDelete = new Set();
@@ -351,6 +362,7 @@
                 'ws.dragTitle': 'Drag & drop your files here', 'ws.dragSub': 'or click to browse — your files stay 100% private',
                 'ws.mergeTitle': 'Files to merge', 'ws.mergeHint': 'Drag cards to reorder',
                 'alert.noFile': 'Please upload/select at least one file to process.', 'alert.processed': 'Processing completed successfully!', 'alert.error': 'An error occurred during file processing: ',
+                'alert.needTwoPdfs': 'Please select at least two PDF files to merge.', 'alert.badFileType': 'This tool does not accept that file type.', 'alert.emptySig': 'Please draw a signature before processing.', 'alert.pdfPassword': 'This PDF is password-protected. Unlock it first, then try again.',
                 'tool.pdf-merge.title': 'Merge PDFs', 'tool.pdf-merge.desc': 'Combine multiple PDF files into one ordered document.',
                 'tool.pdf-split.title': 'Split PDF', 'tool.pdf-split.desc': 'Separate PDF pages or extract page ranges easily.',
                 'tool.pdf-compress.title': 'Compress PDF', 'tool.pdf-compress.desc': 'Optimize PDF file size while retaining document quality.',
@@ -397,6 +409,7 @@
                 'ws.dragTitle': 'اسحب وأفلت ملفاتك هنا', 'ws.dragSub': 'أو انقر للتصفح — تبقى ملفاتك خاصة 100%',
                 'ws.mergeTitle': 'الملفات المراد دمجها', 'ws.mergeHint': 'اسحب البطاقات لإعادة الترتيب',
                 'alert.noFile': 'الرجاء رفع/اختيار ملف واحد على الأقل.', 'alert.processed': 'تمت المعالجة بنجاح!', 'alert.error': 'حدث خطأ أثناء معالجة الملف: ',
+                'alert.needTwoPdfs': 'الرجاء اختيار ملفي PDF على الأقل للدمج.', 'alert.badFileType': 'هذه الأداة لا تقبل هذا النوع من الملفات.', 'alert.emptySig': 'الرجاء رسم توقيع قبل المعالجة.', 'alert.pdfPassword': 'ملف PDF محمي بكلمة مرور. قم بإلغاء قفله أولاً ثم أعد المحاولة.',
                 'tool.pdf-merge.title': 'دمج ملفات PDF', 'tool.pdf-merge.desc': 'اجمع عدة ملفات PDF في مستند واحد مرتّب.',
                 'tool.pdf-split.title': 'تقسيم PDF', 'tool.pdf-split.desc': 'افصل صفحات PDF أو استخرج نطاقات الصفحات بسهولة.',
                 'tool.pdf-compress.title': 'ضغط PDF', 'tool.pdf-compress.desc': 'حسّن حجم ملف PDF مع الحفاظ على جودة المستند.',
@@ -443,6 +456,7 @@
                 'ws.dragTitle': 'Glissez-déposez vos fichiers ici', 'ws.dragSub': 'ou cliquez pour parcourir — vos fichiers restent 100% privés',
                 'ws.mergeTitle': 'Fichiers à fusionner', 'ws.mergeHint': 'Glissez les cartes pour réordonner',
                 'alert.noFile': 'Veuillez importer/sélectionner au moins un fichier.', 'alert.processed': 'Traitement terminé avec succès !', 'alert.error': 'Une erreur est survenue lors du traitement : ',
+                'alert.needTwoPdfs': 'Veuillez sélectionner au moins deux fichiers PDF à fusionner.', 'alert.badFileType': 'Cet outil n’accepte pas ce type de fichier.', 'alert.emptySig': 'Veuillez d’abord dessiner une signature.', 'alert.pdfPassword': 'Ce PDF est protégé par mot de passe. Déverrouillez-le d’abord, puis réessayez.',
                 'tool.pdf-merge.title': 'Fusionner des PDF', 'tool.pdf-merge.desc': 'Combinez plusieurs fichiers PDF en un seul document ordonné.',
                 'tool.pdf-split.title': 'Diviser un PDF', 'tool.pdf-split.desc': 'Séparez les pages PDF ou extrayez facilement des plages.',
                 'tool.pdf-compress.title': 'Compresser un PDF', 'tool.pdf-compress.desc': 'Optimisez la taille du PDF tout en conservant sa qualité.',
@@ -489,6 +503,7 @@
                 'ws.dragTitle': 'Arrastra y suelta tus archivos aquí', 'ws.dragSub': 'o haz clic para explorar — tus archivos siguen siendo 100% privados',
                 'ws.mergeTitle': 'Archivos para unir', 'ws.mergeHint': 'Arrastra las tarjetas para reordenar',
                 'alert.noFile': 'Sube o selecciona al menos un archivo.', 'alert.processed': '¡Procesamiento completado con éxito!', 'alert.error': 'Ocurrió un error al procesar el archivo: ',
+                'alert.needTwoPdfs': 'Selecciona al menos dos archivos PDF para unir.', 'alert.badFileType': 'Esta herramienta no acepta ese tipo de archivo.', 'alert.emptySig': 'Dibuja una firma antes de procesar.', 'alert.pdfPassword': 'Este PDF está protegido con contraseña. Desbloquéalo primero e inténtalo de nuevo.',
                 'tool.pdf-merge.title': 'Unir PDF', 'tool.pdf-merge.desc': 'Combina varios archivos PDF en un solo documento ordenado.',
                 'tool.pdf-split.title': 'Dividir PDF', 'tool.pdf-split.desc': 'Separa páginas PDF o extrae rangos fácilmente.',
                 'tool.pdf-compress.title': 'Comprimir PDF', 'tool.pdf-compress.desc': 'Optimiza el tamaño del PDF manteniendo la calidad.',
@@ -535,6 +550,7 @@
                 'ws.dragTitle': 'Dateien hierher ziehen und ablegen', 'ws.dragSub': 'oder klicken zum Durchsuchen — Dateien bleiben 100% privat',
                 'ws.mergeTitle': 'Zusammenzuführende Dateien', 'ws.mergeHint': 'Karten ziehen zum Neuordnen',
                 'alert.noFile': 'Bitte mindestens eine Datei hochladen/auswählen.', 'alert.processed': 'Verarbeitung erfolgreich abgeschlossen!', 'alert.error': 'Beim Verarbeiten der Datei ist ein Fehler aufgetreten: ',
+                'alert.needTwoPdfs': 'Bitte wählen Sie mindestens zwei PDF-Dateien zum Zusammenführen.', 'alert.badFileType': 'Dieses Tool akzeptiert diesen Dateityp nicht.', 'alert.emptySig': 'Bitte zeichnen Sie zuerst eine Signatur.', 'alert.pdfPassword': 'Dieses PDF ist passwortgeschützt. Entsperren Sie es zuerst und versuchen Sie es erneut.',
                 'tool.pdf-merge.title': 'PDFs zusammenführen', 'tool.pdf-merge.desc': 'Fassen Sie mehrere PDFs zu einem geordneten Dokument zusammen.',
                 'tool.pdf-split.title': 'PDF teilen', 'tool.pdf-split.desc': 'Trennen Sie PDF-Seiten oder extrahieren Sie Seitenbereiche.',
                 'tool.pdf-compress.title': 'PDF komprimieren', 'tool.pdf-compress.desc': 'Optimieren Sie die PDF-Größe bei gleichbleibender Qualität.',
@@ -581,6 +597,7 @@
                 'ws.dragTitle': 'Sleep je bestanden hierheen', 'ws.dragSub': 'of klik om te bladeren — bestanden blijven 100% privé',
                 'ws.mergeTitle': 'Bestanden om samen te voegen', 'ws.mergeHint': 'Sleep kaarten om te herordenen',
                 'alert.noFile': 'Upload/selecteer ten minste één bestand.', 'alert.processed': 'Verwerking succesvol afgerond!', 'alert.error': 'Er is een fout opgetreden bij het verwerken: ',
+                'alert.needTwoPdfs': 'Selecteer minstens twee PDF-bestanden om samen te voegen.', 'alert.badFileType': 'Deze tool accepteert dit bestandstype niet.', 'alert.emptySig': 'Teken eerst een handtekening voordat u verwerkt.', 'alert.pdfPassword': 'Deze PDF is beveiligd met een wachtwoord. Ontgrendel hem eerst en probeer opnieuw.',
                 'tool.pdf-merge.title': 'PDF’s samenvoegen', 'tool.pdf-merge.desc': 'Combineer meerdere PDF-bestanden tot één geordend document.',
                 'tool.pdf-split.title': 'PDF splitsen', 'tool.pdf-split.desc': 'Splits PDF-pagina’s of extraheer eenvoudig paginabereiken.',
                 'tool.pdf-compress.title': 'PDF comprimeren', 'tool.pdf-compress.desc': 'Optimaliseer de PDF-grootte met behoud van kwaliteit.',
@@ -616,6 +633,53 @@
         function t(key) {
             const dict = translations[currentLang] || translations.en;
             return dict[key] || translations.en[key] || key;
+        }
+
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function fileLooksLikePdf(file) {
+            const name = (file && file.name ? file.name : '').toLowerCase();
+            const type = (file && file.type ? file.type : '').toLowerCase();
+            return type.includes('pdf') || name.endsWith('.pdf');
+        }
+
+        function fileLooksLikeImage(file) {
+            const name = (file && file.name ? file.name : '').toLowerCase();
+            const type = (file && file.type ? file.type : '').toLowerCase();
+            return type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(name);
+        }
+
+        function fileLooksLikeText(file) {
+            const name = (file && file.name ? file.name : '').toLowerCase();
+            const type = (file && file.type ? file.type : '').toLowerCase();
+            return type.includes('text') || name.endsWith('.txt') || name.endsWith('.text');
+        }
+
+        function fileAcceptedByTool(file, tool) {
+            if (!file || !tool) return false;
+            if (tool.accept === '.pdf') return fileLooksLikePdf(file);
+            if (tool.accept === 'image/*') return fileLooksLikeImage(file);
+            if (tool.accept && tool.accept.includes('.txt')) return fileLooksLikeText(file);
+            return true;
+        }
+
+        function filterAcceptedFiles(files, tool) {
+            return (files || []).filter(file => fileAcceptedByTool(file, tool));
+        }
+
+        function friendlyProcessError(err) {
+            const msg = String((err && err.message) || err || '');
+            if (/password|encrypted/i.test(msg)) return t('alert.pdfPassword');
+            const known = [t('alert.needTwoPdfs'), t('alert.badFileType'), t('alert.emptySig')];
+            if (known.includes(msg)) return msg;
+            return t('alert.error') + msg;
         }
 
         function toolTitle(tool) {
@@ -706,6 +770,7 @@
         ];
 
         window.onload = function() {
+            initTheme();
             initLanguage();
 
             // Keyboard shortcut for search
@@ -735,7 +800,15 @@
         };
 
         function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.toggle('dark');
+            try { localStorage.setItem('epdf-theme', isDark ? 'dark' : 'light'); } catch (e) {}
+        }
+
+        function initTheme() {
+            let saved = '';
+            try { saved = localStorage.getItem('epdf-theme') || ''; } catch (e) {}
+            if (saved === 'dark') document.documentElement.classList.add('dark');
+            else if (saved === 'light') document.documentElement.classList.remove('dark');
         }
 
         function filterCategory(cat) {
@@ -877,7 +950,7 @@
             document.getElementById('wsToolTitle').innerText = toolTitle(activeTool);
             document.getElementById('wsToolDesc').innerText = toolDesc(activeTool);
 
-            loadedFiles = preloadedFiles ? Array.from(preloadedFiles) : [];
+            loadedFiles = preloadedFiles ? filterAcceptedFiles(Array.from(preloadedFiles), activeTool) : [];
 
             renderWorkspaceBody();
             document.getElementById('workspaceModal').classList.remove('hidden');
@@ -892,6 +965,8 @@
             pagesToDelete = new Set();
             reorderDragIndex = null;
             mergeDragIndex = null;
+            signatureDrawn = false;
+            mergeThumbCache.clear();
         }
 
         function renderWorkspaceBody() {
@@ -938,7 +1013,7 @@
                         loadedFiles.forEach((f, idx) => {
                             fileListDiv.innerHTML += `
                                 <span class="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="fa-solid fa-file text-blue-500"></i> ${f.name} (${(f.size/1024).toFixed(1)} KB)
+                                    <i class="fa-solid fa-file text-blue-500"></i> ${escapeHtml(f.name)} (${(f.size/1024).toFixed(1)} KB)
                                     <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 cursor-pointer" onclick="removeWorkspaceFile(${idx})"></i>
                                 </span>
                             `;
@@ -952,7 +1027,7 @@
                 fileBar.className = "flex items-center justify-between gap-3 px-3 py-2 bg-slate-100 dark:bg-slate-900 rounded-lg";
                 fileBar.innerHTML = `
                     <span class="inline-flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 truncate">
-                        <i class="fa-solid fa-file-pdf text-red-500"></i> ${loadedFiles[0].name} (${(loadedFiles[0].size/1024).toFixed(1)} KB)
+                        <i class="fa-solid fa-file-pdf text-red-500"></i> ${escapeHtml(loadedFiles[0].name)} (${(loadedFiles[0].size/1024).toFixed(1)} KB)
                     </span>
                     <input type="file" id="wsFileInput" accept="${activeTool.accept}" class="hidden" onchange="onWorkspaceFileChoose(event)">
                     <button onclick="document.getElementById('wsFileInput').click()" class="shrink-0 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
@@ -1114,7 +1189,13 @@
 
         function onWorkspaceFileChoose(e) {
             if (e.target.files.length > 0) {
-                loadedFiles = Array.from(e.target.files);
+                const incoming = filterAcceptedFiles(Array.from(e.target.files), activeTool);
+                if (incoming.length === 0) {
+                    alert(t('alert.badFileType'));
+                    e.target.value = '';
+                    return;
+                }
+                loadedFiles = incoming;
                 reorderPageOrder = [];
                 pagePreviewCache = [];
                 pagesToDelete = new Set();
@@ -1139,7 +1220,11 @@
             const zone = document.getElementById('wsDropZone');
             if (zone) zone.classList.remove('border-blue-500', 'bg-blue-50/70', 'dark:bg-slate-700/50');
             if (!e.dataTransfer || e.dataTransfer.files.length === 0) return;
-            const incoming = Array.from(e.dataTransfer.files);
+            const incoming = filterAcceptedFiles(Array.from(e.dataTransfer.files), activeTool);
+            if (incoming.length === 0) {
+                alert(t('alert.badFileType'));
+                return;
+            }
             loadedFiles = (activeTool && activeTool.multiple) ? [...loadedFiles, ...incoming] : incoming;
             reorderPageOrder = [];
             pagePreviewCache = [];
@@ -1213,14 +1298,14 @@
                 card.innerHTML = `
                     <div class="relative bg-slate-200 dark:bg-slate-700 aspect-[3/4] flex items-center justify-center overflow-hidden pointer-events-none">
                         <i class="fa-solid fa-file-pdf text-slate-300 dark:text-slate-600 text-2xl"></i>
-                        <img class="thumb absolute inset-0 w-full h-full object-contain bg-white hidden" alt="${file.name}">
+                        <img class="thumb absolute inset-0 w-full h-full object-contain bg-white hidden" alt="${escapeHtml(file.name)}">
                     </div>
                     <span class="absolute top-1 left-1 w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>
                     <button type="button" onclick="event.stopPropagation(); removeWorkspaceFile(${idx})" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 dark:bg-slate-900/90 text-slate-500 hover:text-red-500 shadow flex items-center justify-center">
                         <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                     <div class="px-2 py-1.5">
-                        <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 truncate" title="${file.name}">${file.name}</p>
+                        <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 truncate" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</p>
                         <p class="text-[10px] text-slate-400">${(file.size/1024).toFixed(1)} KB</p>
                     </div>
                 `;
@@ -1303,19 +1388,20 @@
             signatureCtx.strokeStyle = '#000000';
             signatureCtx.lineWidth = 2.5;
             signatureCtx.lineCap = 'round';
+            signatureDrawn = false;
 
             let drawing = false;
 
             function getPos(e) {
+                const point = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
                 const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 const scaleX = rect.width ? canvas.width / rect.width : 1;
                 const scaleY = rect.height ? canvas.height / rect.height : 1;
-                return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+                return { x: (point.clientX - rect.left) * scaleX, y: (point.clientY - rect.top) * scaleY };
             }
 
             canvas.onmousedown = canvas.ontouchstart = (e) => {
+                e.preventDefault();
                 drawing = true;
                 const pos = getPos(e);
                 signatureCtx.beginPath();
@@ -1324,18 +1410,21 @@
 
             canvas.onmousemove = canvas.ontouchmove = (e) => {
                 if (!drawing) return;
+                e.preventDefault();
                 const pos = getPos(e);
                 signatureCtx.lineTo(pos.x, pos.y);
                 signatureCtx.stroke();
+                signatureDrawn = true;
             };
 
-            canvas.onmouseup = canvas.ontouchend = () => drawing = false;
+            canvas.onmouseup = canvas.ontouchend = canvas.onmouseleave = () => { drawing = false; };
         }
 
         function clearSigCanvas() {
             const canvas = document.getElementById('sigCanvas');
             if (canvas && signatureCtx) {
                 signatureCtx.clearRect(0, 0, canvas.width, canvas.height);
+                signatureDrawn = false;
             }
         }
 
@@ -1374,7 +1463,7 @@
                 try { if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 60, origin: { y: 0.8 } }); } catch (e) {}
             } catch (err) {
                 console.error(err);
-                alert(t('alert.error') + err.message);
+                alert(friendlyProcessError(err));
             } finally {
                 btn.innerHTML = origHtml;
                 btn.disabled = false;
@@ -1387,6 +1476,7 @@
             pagePreviewCache = [];
             pagesToDelete = new Set();
             reorderDragIndex = null;
+            signatureDrawn = false;
             if (activeTool) {
                 const body = document.getElementById('wsBody');
                 if (body) body.scrollTop = 0;
@@ -1395,10 +1485,12 @@
         }
 
         async function processPDFMerge() {
+            const pdfFiles = loadedFiles.filter(fileLooksLikePdf);
+            if (pdfFiles.length < 2) throw new Error(t('alert.needTwoPdfs'));
             const mergedPdf = await PDFLib.PDFDocument.create();
-            for (let file of loadedFiles) {
+            for (let file of pdfFiles) {
                 const arrayBuffer = await file.arrayBuffer();
-                const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                const pdf = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
                 const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
                 copiedPages.forEach(p => mergedPdf.addPage(p));
             }
@@ -1443,7 +1535,7 @@
 
         async function loadPdfDocument(file) {
             const arrayBuffer = await file.arrayBuffer();
-            return PDFLib.PDFDocument.load(arrayBuffer);
+            return PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         }
 
         async function saveAndDownloadPdf(pdf, filename) {
@@ -1453,7 +1545,7 @@
 
         async function renderPdfPageThumbnails(file) {
             if (pagePreviewCache.length) return pagePreviewCache;
-            const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+            const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
             const thumbs = [];
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
@@ -1646,7 +1738,7 @@
             const scale = scaleMap[level] || 1.1;
             const quality = qualityMap[level] || 0.62;
 
-            const srcDoc = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+            const srcDoc = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
             const outPdf = await PDFLib.PDFDocument.create();
 
             for (let i = 1; i <= srcDoc.numPages; i++) {
@@ -1667,7 +1759,7 @@
         }
 
         async function processPDFRotate() {
-            const angle = parseInt(document.getElementById('optRotateAngle').value);
+            const angle = parseInt(document.getElementById('optRotateAngle').value, 10) || 90;
             const pdf = await loadPdfDocument(loadedFiles[0]);
             pdf.getPages().forEach(p => {
                 const current = p.getRotation().angle || 0;
@@ -1698,8 +1790,10 @@
 
         async function processPDFWatermark() {
             const wmText = document.getElementById('optWMText').value || 'CONFIDENTIAL';
-            const opacity = parseFloat(document.getElementById('optWMOpacity').value) || 0.4;
-            const angle = parseInt(document.getElementById('optWMAngle').value, 10) || -45;
+            const opacityRaw = parseFloat(document.getElementById('optWMOpacity').value);
+            const opacity = Number.isFinite(opacityRaw) ? opacityRaw : 0.4;
+            const angleRaw = parseInt(document.getElementById('optWMAngle').value, 10);
+            const angle = Number.isFinite(angleRaw) ? angleRaw : -45;
             const rgb = hexToRgb(document.getElementById('optWMColor').value);
             const pdf = await loadPdfDocument(loadedFiles[0]);
             const font = await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold);
@@ -1723,6 +1817,7 @@
 
         async function processPDFSignature() {
             const sigCanvas = document.getElementById('sigCanvas');
+            if (!sigCanvas || !signatureDrawn) throw new Error(t('alert.emptySig'));
             const sigImgData = sigCanvas.toDataURL('image/png');
             const pdf = await loadPdfDocument(loadedFiles[0]);
             const pages = pdf.getPages();
@@ -1745,7 +1840,7 @@
             const file = loadedFiles[0];
             const format = document.getElementById('optPdfImgFormat').value;
             const ext = format === 'image/jpeg' ? 'jpg' : 'png';
-            const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+            const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
@@ -1769,8 +1864,10 @@
             const img = await loadImage(file);
             const wmText = document.getElementById('optWMText').value || 'CONFIDENTIAL';
             const color = document.getElementById('optWMColor').value || '#ef4444';
-            const opacity = parseFloat(document.getElementById('optWMOpacity').value) || 0.4;
-            const angle = parseInt(document.getElementById('optWMAngle').value, 10) || -45;
+            const opacityRaw = parseFloat(document.getElementById('optWMOpacity').value);
+            const opacity = Number.isFinite(opacityRaw) ? opacityRaw : 0.4;
+            const angleRaw = parseInt(document.getElementById('optWMAngle').value, 10);
+            const angle = Number.isFinite(angleRaw) ? angleRaw : -45;
 
             const canvas = document.createElement('canvas');
             canvas.width = img.width;
@@ -1823,7 +1920,7 @@
 
         async function processImageTargetKB() {
             const file = loadedFiles[0];
-            const targetKB = parseInt(document.getElementById('optTargetKBVal').value);
+            const targetKB = parseInt(document.getElementById('optTargetKBVal').value, 10) || 50;
             const targetBytes = targetKB * 1024;
             const img = await loadImage(file);
 
@@ -1939,14 +2036,26 @@
         function loadImage(file) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
-                img.onload = () => resolve(img);
-                img.onerror = reject;
-                img.src = URL.createObjectURL(file);
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    resolve(img);
+                };
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('Unable to load image.'));
+                };
+                img.src = url;
             });
         }
 
         function canvasToBlobPromise(canvas, type, quality) {
-            return new Promise(resolve => canvas.toBlob(resolve, type, quality));
+            return new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                    if (!blob) reject(new Error('Unable to encode image.'));
+                    else resolve(blob);
+                }, type, quality);
+            });
         }
 
         async function canvasToArrayBuffer(canvas, type, quality) {
