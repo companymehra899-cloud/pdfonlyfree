@@ -6,6 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta name="app-build" content="20260928-compress-fix">
     <title>ePDFConverter - Modern PDF & Image Utility Suite</title>
     
     <!-- Tailwind CSS -->
@@ -37,17 +38,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
-        (function () {
-            var workerUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-            try {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob(
-                    ["importScripts('" + workerUrl + "');"],
-                    { type: 'application/javascript' }
-                ));
-            } catch (e) {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
-            }
-        })();
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
@@ -147,6 +138,32 @@
             background: #4f46e5;
             cursor: pointer;
             border: 0;
+        }
+
+        .ws-progress-bar {
+            width: 100%;
+            height: 6px;
+            border-radius: 9999px;
+            background: rgba(148, 163, 184, 0.35);
+            overflow: hidden;
+        }
+        .ws-progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #2563eb, #4f46e5);
+            transition: width 0.2s ease;
+        }
+        @keyframes ws-spin {
+            to { transform: rotate(360deg); }
+        }
+        .ws-spinner {
+            width: 56px;
+            height: 56px;
+            border-radius: 9999px;
+            border: 5px solid rgba(148, 163, 184, 0.35);
+            border-top-color: #2563eb;
+            animation: ws-spin 0.8s linear infinite;
         }
 
         .nav-btn.active-nav {
@@ -279,7 +296,7 @@
 
         <!-- Interactive Tool Workspace Modal -->
         <div id="workspaceModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-stretch justify-center p-0">
-            <div class="bg-white dark:bg-slate-800 shadow-2xl w-full h-full max-w-none max-h-none flex flex-col overflow-hidden border-0">
+            <div class="relative bg-white dark:bg-slate-800 shadow-2xl w-full h-full max-w-none max-h-none flex flex-col overflow-hidden border-0">
                 
                 <!-- Workspace Header -->
                 <div class="px-4 sm:px-8 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/80 shrink-0">
@@ -311,6 +328,20 @@
                         <i class="fa-solid fa-gear"></i>
                         <span data-i18n="processDocument">Process Document</span>
                     </button>
+                </div>
+
+                <div id="wsBusyOverlay" style="display:none;position:absolute;inset:0;z-index:70;background:rgba(15,23,42,0.72);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;">
+                    <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl px-6 py-8 text-center">
+                        <div id="wsBusySpinner" class="ws-spinner mx-auto mb-5"></div>
+                        <p id="wsBusyTitle" class="text-lg font-semibold text-slate-800 dark:text-white">Processing...</p>
+                        <p id="wsBusySub" class="text-sm text-slate-500 dark:text-slate-400 mt-2">Please wait</p>
+                        <div id="wsBusyBarWrap" style="display:none" class="mt-5 text-left">
+                            <div class="ws-progress-bar">
+                                <div id="wsBusyBarFill" class="ws-progress-fill"></div>
+                            </div>
+                            <p id="wsBusyBarLabel" class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">0%</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -356,11 +387,12 @@
                 'cat.all': 'All Tools', 'cat.pdf': 'PDF Utilities', 'cat.image': 'Image Utilities', 'cat.convert': 'Document Converters',
                 'tools.count': '{n} Tools Available', 'tools.open': 'Open Tool', 'tools.none': 'No tools match your search criteria.',
                 'cancel': 'Cancel', 'processDocument': 'Process Document', 'processing': 'Processing...',
+                'busy.wait': 'Please wait while your document is prepared.', 'busy.compress': 'Compressing PDF...', 'busy.compressSub': 'High compression in progress', 'busy.page': 'Page {n} of {t}', 'busy.pass': 'Pass {n} of {t}',
                 'footer.local': 'All processing happens 100% locally in your browser.', 'footer.noUpload': 'No files uploaded', 'footer.instant': 'Instant conversion',
                 'search.placeholder': 'Search tools... (Ctrl+K)',
                 'ws.chooseFile': 'Choose File', 'ws.chooseFiles': 'Choose Files', 'ws.selectFile': 'Select file to begin processing', 'ws.selected': '{n} file(s) selected', 'ws.changeFile': 'Change file',
                 'ws.dragTitle': 'Drag & drop your files here', 'ws.dragSub': 'or click to browse — your files stay 100% private',
-                'ws.mergeTitle': 'Files to merge', 'ws.mergeHint': 'Drag cards to reorder',
+                'ws.mergeTitle': 'Files to merge', 'ws.mergeHint': 'Drag cards to reorder', 'ws.pdfLabel': 'PDF {n}', 'ws.addFiles': 'Add files', 'ws.mergeSelected': '{n} PDF(s) selected',
                 'alert.noFile': 'Please upload/select at least one file to process.', 'alert.processed': 'Processing completed successfully!', 'alert.error': 'An error occurred during file processing: ',
                 'alert.needTwoPdfs': 'Please select at least two PDF files to merge.', 'alert.badFileType': 'This tool does not accept that file type.', 'alert.emptySig': 'Please draw a signature before processing.', 'alert.pdfPassword': 'This PDF is password-protected. Unlock it first, then try again.',
                 'tool.pdf-merge.title': 'Merge PDFs', 'tool.pdf-merge.desc': 'Combine multiple PDF files into one ordered document.',
@@ -403,11 +435,12 @@
                 'cat.all': 'كل الأدوات', 'cat.pdf': 'أدوات PDF', 'cat.image': 'أدوات الصور', 'cat.convert': 'محوّلات المستندات',
                 'tools.count': '{n} أداة متاحة', 'tools.open': 'افتح الأداة', 'tools.none': 'لا توجد أدوات مطابقة لبحثك.',
                 'cancel': 'إلغاء', 'processDocument': 'معالجة المستند', 'processing': 'جارٍ المعالجة...',
+                'busy.wait': 'يرجى الانتظار أثناء تجهيز المستند.', 'busy.compress': 'جارٍ ضغط PDF...', 'busy.compressSub': 'الضغط العالي قيد التنفيذ', 'busy.page': 'صفحة {n} من {t}', 'busy.pass': 'المرور {n} من {t}',
                 'footer.local': 'تتم كل المعالجة 100٪ محليًا في متصفحك.', 'footer.noUpload': 'لا يتم رفع الملفات', 'footer.instant': 'تحويل فوري',
                 'search.placeholder': 'ابحث عن الأدوات... (Ctrl+K)',
                 'ws.chooseFile': 'اختر ملفًا', 'ws.chooseFiles': 'اختر ملفات', 'ws.selectFile': 'اختر ملفًا للبدء', 'ws.selected': 'تم اختيار {n} ملف', 'ws.changeFile': 'تغيير الملف',
                 'ws.dragTitle': 'اسحب وأفلت ملفاتك هنا', 'ws.dragSub': 'أو انقر للتصفح — تبقى ملفاتك خاصة 100%',
-                'ws.mergeTitle': 'الملفات المراد دمجها', 'ws.mergeHint': 'اسحب البطاقات لإعادة الترتيب',
+                'ws.mergeTitle': 'الملفات المراد دمجها', 'ws.mergeHint': 'اسحب البطاقات لإعادة الترتيب', 'ws.pdfLabel': 'PDF {n}', 'ws.addFiles': 'إضافة ملفات', 'ws.mergeSelected': 'تم اختيار {n} PDF',
                 'alert.noFile': 'الرجاء رفع/اختيار ملف واحد على الأقل.', 'alert.processed': 'تمت المعالجة بنجاح!', 'alert.error': 'حدث خطأ أثناء معالجة الملف: ',
                 'alert.needTwoPdfs': 'الرجاء اختيار ملفي PDF على الأقل للدمج.', 'alert.badFileType': 'هذه الأداة لا تقبل هذا النوع من الملفات.', 'alert.emptySig': 'الرجاء رسم توقيع قبل المعالجة.', 'alert.pdfPassword': 'ملف PDF محمي بكلمة مرور. قم بإلغاء قفله أولاً ثم أعد المحاولة.',
                 'tool.pdf-merge.title': 'دمج ملفات PDF', 'tool.pdf-merge.desc': 'اجمع عدة ملفات PDF في مستند واحد مرتّب.',
@@ -450,11 +483,12 @@
                 'cat.all': 'Tous les outils', 'cat.pdf': 'Utilitaires PDF', 'cat.image': 'Utilitaires d’image', 'cat.convert': 'Convertisseurs de documents',
                 'tools.count': '{n} outils disponibles', 'tools.open': 'Ouvrir l’outil', 'tools.none': 'Aucun outil ne correspond à votre recherche.',
                 'cancel': 'Annuler', 'processDocument': 'Traiter le document', 'processing': 'Traitement...',
+                'busy.wait': 'Veuillez patienter pendant la préparation du document.', 'busy.compress': 'Compression du PDF...', 'busy.compressSub': 'Compression élevée en cours', 'busy.page': 'Page {n} sur {t}', 'busy.pass': 'Passe {n} sur {t}',
                 'footer.local': 'Tout le traitement est effectué 100% localement dans votre navigateur.', 'footer.noUpload': 'Aucun fichier envoyé', 'footer.instant': 'Conversion instantanée',
                 'search.placeholder': 'Rechercher des outils... (Ctrl+K)',
                 'ws.chooseFile': 'Choisir un fichier', 'ws.chooseFiles': 'Choisir des fichiers', 'ws.selectFile': 'Sélectionnez un fichier pour commencer', 'ws.selected': '{n} fichier(s) sélectionné(s)', 'ws.changeFile': 'Changer de fichier',
                 'ws.dragTitle': 'Glissez-déposez vos fichiers ici', 'ws.dragSub': 'ou cliquez pour parcourir — vos fichiers restent 100% privés',
-                'ws.mergeTitle': 'Fichiers à fusionner', 'ws.mergeHint': 'Glissez les cartes pour réordonner',
+                'ws.mergeTitle': 'Fichiers à fusionner', 'ws.mergeHint': 'Glissez les cartes pour réordonner', 'ws.pdfLabel': 'PDF {n}', 'ws.addFiles': 'Ajouter des fichiers', 'ws.mergeSelected': '{n} PDF sélectionné(s)',
                 'alert.noFile': 'Veuillez importer/sélectionner au moins un fichier.', 'alert.processed': 'Traitement terminé avec succès !', 'alert.error': 'Une erreur est survenue lors du traitement : ',
                 'alert.needTwoPdfs': 'Veuillez sélectionner au moins deux fichiers PDF à fusionner.', 'alert.badFileType': 'Cet outil n’accepte pas ce type de fichier.', 'alert.emptySig': 'Veuillez d’abord dessiner une signature.', 'alert.pdfPassword': 'Ce PDF est protégé par mot de passe. Déverrouillez-le d’abord, puis réessayez.',
                 'tool.pdf-merge.title': 'Fusionner des PDF', 'tool.pdf-merge.desc': 'Combinez plusieurs fichiers PDF en un seul document ordonné.',
@@ -497,11 +531,12 @@
                 'cat.all': 'Todas las herramientas', 'cat.pdf': 'Utilidades PDF', 'cat.image': 'Utilidades de imagen', 'cat.convert': 'Convertidores de documentos',
                 'tools.count': '{n} herramientas disponibles', 'tools.open': 'Abrir herramienta', 'tools.none': 'Ninguna herramienta coincide con tu búsqueda.',
                 'cancel': 'Cancelar', 'processDocument': 'Procesar documento', 'processing': 'Procesando...',
+                'busy.wait': 'Espera mientras se prepara el documento.', 'busy.compress': 'Comprimiendo PDF...', 'busy.compressSub': 'Compresión alta en curso', 'busy.page': 'Página {n} de {t}', 'busy.pass': 'Pase {n} de {t}',
                 'footer.local': 'Todo el procesamiento ocurre 100% localmente en tu navegador.', 'footer.noUpload': 'No se suben archivos', 'footer.instant': 'Conversión instantánea',
                 'search.placeholder': 'Buscar herramientas... (Ctrl+K)',
                 'ws.chooseFile': 'Elegir archivo', 'ws.chooseFiles': 'Elegir archivos', 'ws.selectFile': 'Selecciona un archivo para empezar', 'ws.selected': '{n} archivo(s) seleccionado(s)', 'ws.changeFile': 'Cambiar archivo',
                 'ws.dragTitle': 'Arrastra y suelta tus archivos aquí', 'ws.dragSub': 'o haz clic para explorar — tus archivos siguen siendo 100% privados',
-                'ws.mergeTitle': 'Archivos para unir', 'ws.mergeHint': 'Arrastra las tarjetas para reordenar',
+                'ws.mergeTitle': 'Archivos para unir', 'ws.mergeHint': 'Arrastra las tarjetas para reordenar', 'ws.pdfLabel': 'PDF {n}', 'ws.addFiles': 'Añadir archivos', 'ws.mergeSelected': '{n} PDF seleccionado(s)',
                 'alert.noFile': 'Sube o selecciona al menos un archivo.', 'alert.processed': '¡Procesamiento completado con éxito!', 'alert.error': 'Ocurrió un error al procesar el archivo: ',
                 'alert.needTwoPdfs': 'Selecciona al menos dos archivos PDF para unir.', 'alert.badFileType': 'Esta herramienta no acepta ese tipo de archivo.', 'alert.emptySig': 'Dibuja una firma antes de procesar.', 'alert.pdfPassword': 'Este PDF está protegido con contraseña. Desbloquéalo primero e inténtalo de nuevo.',
                 'tool.pdf-merge.title': 'Unir PDF', 'tool.pdf-merge.desc': 'Combina varios archivos PDF en un solo documento ordenado.',
@@ -544,11 +579,12 @@
                 'cat.all': 'Alle Tools', 'cat.pdf': 'PDF-Werkzeuge', 'cat.image': 'Bild-Werkzeuge', 'cat.convert': 'Dokument-Konverter',
                 'tools.count': '{n} Tools verfügbar', 'tools.open': 'Tool öffnen', 'tools.none': 'Keine Tools entsprechen Ihrer Suche.',
                 'cancel': 'Abbrechen', 'processDocument': 'Dokument verarbeiten', 'processing': 'Verarbeitung...',
+                'busy.wait': 'Bitte warten Sie, während das Dokument vorbereitet wird.', 'busy.compress': 'PDF wird komprimiert...', 'busy.compressSub': 'Hohe Kompression läuft', 'busy.page': 'Seite {n} von {t}', 'busy.pass': 'Durchlauf {n} von {t}',
                 'footer.local': 'Die gesamte Verarbeitung erfolgt zu 100% lokal in Ihrem Browser.', 'footer.noUpload': 'Keine Dateien hochgeladen', 'footer.instant': 'Sofortige Konvertierung',
                 'search.placeholder': 'Tools suchen... (Ctrl+K)',
                 'ws.chooseFile': 'Datei wählen', 'ws.chooseFiles': 'Dateien wählen', 'ws.selectFile': 'Datei zum Starten auswählen', 'ws.selected': '{n} Datei(en) ausgewählt', 'ws.changeFile': 'Datei ändern',
                 'ws.dragTitle': 'Dateien hierher ziehen und ablegen', 'ws.dragSub': 'oder klicken zum Durchsuchen — Dateien bleiben 100% privat',
-                'ws.mergeTitle': 'Zusammenzuführende Dateien', 'ws.mergeHint': 'Karten ziehen zum Neuordnen',
+                'ws.mergeTitle': 'Zusammenzuführende Dateien', 'ws.mergeHint': 'Karten ziehen zum Neuordnen', 'ws.pdfLabel': 'PDF {n}', 'ws.addFiles': 'Dateien hinzufügen', 'ws.mergeSelected': '{n} PDF(s) ausgewählt',
                 'alert.noFile': 'Bitte mindestens eine Datei hochladen/auswählen.', 'alert.processed': 'Verarbeitung erfolgreich abgeschlossen!', 'alert.error': 'Beim Verarbeiten der Datei ist ein Fehler aufgetreten: ',
                 'alert.needTwoPdfs': 'Bitte wählen Sie mindestens zwei PDF-Dateien zum Zusammenführen.', 'alert.badFileType': 'Dieses Tool akzeptiert diesen Dateityp nicht.', 'alert.emptySig': 'Bitte zeichnen Sie zuerst eine Signatur.', 'alert.pdfPassword': 'Dieses PDF ist passwortgeschützt. Entsperren Sie es zuerst und versuchen Sie es erneut.',
                 'tool.pdf-merge.title': 'PDFs zusammenführen', 'tool.pdf-merge.desc': 'Fassen Sie mehrere PDFs zu einem geordneten Dokument zusammen.',
@@ -591,11 +627,12 @@
                 'cat.all': 'Alle tools', 'cat.pdf': 'PDF-hulpmiddelen', 'cat.image': 'Afbeeldingshulpmiddelen', 'cat.convert': 'Documentconverters',
                 'tools.count': '{n} tools beschikbaar', 'tools.open': 'Tool openen', 'tools.none': 'Geen tools gevonden voor uw zoekopdracht.',
                 'cancel': 'Annuleren', 'processDocument': 'Document verwerken', 'processing': 'Verwerken...',
+                'busy.wait': 'Even geduld terwijl het document wordt voorbereid.', 'busy.compress': 'PDF comprimeren...', 'busy.compressSub': 'Hoge compressie bezig', 'busy.page': 'Pagina {n} van {t}', 'busy.pass': 'Doorgang {n} van {t}',
                 'footer.local': 'Alle verwerking gebeurt 100% lokaal in uw browser.', 'footer.noUpload': 'Geen bestanden geüpload', 'footer.instant': 'Directe conversie',
                 'search.placeholder': 'Zoek tools... (Ctrl+K)',
                 'ws.chooseFile': 'Bestand kiezen', 'ws.chooseFiles': 'Bestanden kiezen', 'ws.selectFile': 'Selecteer een bestand om te beginnen', 'ws.selected': '{n} bestand(en) geselecteerd', 'ws.changeFile': 'Bestand wijzigen',
                 'ws.dragTitle': 'Sleep je bestanden hierheen', 'ws.dragSub': 'of klik om te bladeren — bestanden blijven 100% privé',
-                'ws.mergeTitle': 'Bestanden om samen te voegen', 'ws.mergeHint': 'Sleep kaarten om te herordenen',
+                'ws.mergeTitle': 'Bestanden om samen te voegen', 'ws.mergeHint': 'Sleep kaarten om te herordenen', 'ws.pdfLabel': 'PDF {n}', 'ws.addFiles': 'Bestanden toevoegen', 'ws.mergeSelected': '{n} PDF(s) geselecteerd',
                 'alert.noFile': 'Upload/selecteer ten minste één bestand.', 'alert.processed': 'Verwerking succesvol afgerond!', 'alert.error': 'Er is een fout opgetreden bij het verwerken: ',
                 'alert.needTwoPdfs': 'Selecteer minstens twee PDF-bestanden om samen te voegen.', 'alert.badFileType': 'Deze tool accepteert dit bestandstype niet.', 'alert.emptySig': 'Teken eerst een handtekening voordat u verwerkt.', 'alert.pdfPassword': 'Deze PDF is beveiligd met een wachtwoord. Ontgrendel hem eerst en probeer opnieuw.',
                 'tool.pdf-merge.title': 'PDF’s samenvoegen', 'tool.pdf-merge.desc': 'Combineer meerdere PDF-bestanden tot één geordend document.',
@@ -957,6 +994,7 @@
         }
 
         function closeWorkspace() {
+            hideWorkspaceBusy();
             document.getElementById('workspaceModal').classList.add('hidden');
             activeTool = null;
             loadedFiles = [];
@@ -973,7 +1011,7 @@
             const body = document.getElementById('wsBody');
             body.innerHTML = '';
 
-            const isPagePreviewTool = activeTool.id === 'pdf-delete-pages' || activeTool.id === 'pdf-reorder';
+            const isPagePreviewTool = activeTool.id === 'pdf-delete-pages' || activeTool.id === 'pdf-reorder' || activeTool.id === 'pdf-merge';
             const hasFiles = loadedFiles.length > 0;
 
             // 1. File Upload Dropzone in Workspace
@@ -1003,26 +1041,34 @@
                 `;
                 body.appendChild(fileUploadBox);
 
-                // Display selected files: draggable cards for Merge PDF, pills otherwise
+                // Display selected files as pills
                 if (hasFiles) {
-                    if (activeTool.id === 'pdf-merge') {
-                        renderMergeFileGrid(body);
-                    } else {
-                        const fileListDiv = document.createElement('div');
-                        fileListDiv.className = "flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 bg-slate-100 dark:bg-slate-900 rounded-lg";
-                        loadedFiles.forEach((f, idx) => {
-                            fileListDiv.innerHTML += `
-                                <span class="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="fa-solid fa-file text-blue-500"></i> ${escapeHtml(f.name)} (${(f.size/1024).toFixed(1)} KB)
-                                    <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 cursor-pointer" onclick="removeWorkspaceFile(${idx})"></i>
-                                </span>
-                            `;
-                        });
-                        body.appendChild(fileListDiv);
-                    }
+                    const fileListDiv = document.createElement('div');
+                    fileListDiv.className = "flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 bg-slate-100 dark:bg-slate-900 rounded-lg";
+                    loadedFiles.forEach((f, idx) => {
+                        fileListDiv.innerHTML += `
+                            <span class="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300">
+                                <i class="fa-solid fa-file text-blue-500"></i> ${escapeHtml(f.name)} (${(f.size/1024).toFixed(1)} KB)
+                                <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 cursor-pointer" onclick="removeWorkspaceFile(${idx})"></i>
+                            </span>
+                        `;
+                    });
+                    body.appendChild(fileListDiv);
                 }
+            } else if (activeTool.id === 'pdf-merge') {
+                const fileBar = document.createElement('div');
+                fileBar.className = "flex items-center justify-between gap-3 px-3 py-2 bg-slate-100 dark:bg-slate-900 rounded-lg";
+                fileBar.innerHTML = `
+                    <span class="inline-flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 truncate">
+                        <i class="fa-solid fa-file-pdf text-red-500"></i> ${t('ws.mergeSelected').replace('{n}', loadedFiles.length)}
+                    </span>
+                    <input type="file" id="wsFileInput" accept="${activeTool.accept}" multiple class="hidden" onchange="onWorkspaceFileChoose(event)">
+                    <button onclick="document.getElementById('wsFileInput').click()" class="shrink-0 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                        <i class="fa-solid fa-plus mr-1"></i>${t('ws.addFiles')}
+                    </button>
+                `;
+                body.appendChild(fileBar);
             } else {
-                // Compact file bar for page-preview tools (upload box hidden after upload)
                 const fileBar = document.createElement('div');
                 fileBar.className = "flex items-center justify-between gap-3 px-3 py-2 bg-slate-100 dark:bg-slate-900 rounded-lg";
                 fileBar.innerHTML = `
@@ -1066,6 +1112,13 @@
                     </select>
                     <span class="text-xs text-slate-400">${t('opt.compress.hint')}</span>
                 `;
+            } else if (activeTool.id === 'pdf-merge') {
+                optionsDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">${t('ws.mergeTitle')}</label>
+                    <p class="text-xs text-slate-400 mb-2">${t('ws.mergeHint')}</p>
+                    <div id="mergeFileGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-3 p-3 bg-slate-100 dark:bg-slate-900 rounded-lg min-h-[120px]"></div>
+                `;
+                setTimeout(renderMergeCards, 50);
             } else if (activeTool.id === 'pdf-delete-pages') {
                 optionsDiv.innerHTML = `
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">${t('opt.delete.label')}</label>
@@ -1195,7 +1248,9 @@
                     e.target.value = '';
                     return;
                 }
-                loadedFiles = incoming;
+                loadedFiles = (activeTool && activeTool.id === 'pdf-merge' && activeTool.multiple)
+                    ? [...loadedFiles, ...incoming]
+                    : incoming;
                 reorderPageOrder = [];
                 pagePreviewCache = [];
                 pagesToDelete = new Set();
@@ -1237,22 +1292,6 @@
             renderWorkspaceBody();
         }
 
-        function renderMergeFileGrid(container) {
-            const wrap = document.createElement('div');
-            wrap.innerHTML = `
-                <div class="flex items-center justify-between mb-2 gap-2">
-                    <span class="text-sm font-medium text-slate-700 dark:text-slate-300">${t('ws.mergeTitle')} (${loadedFiles.length})</span>
-                    <span class="hidden md:inline text-xs text-slate-400"><i class="fa-solid fa-arrows-up-down-left-right mr-1"></i>${t('ws.mergeHint')}</span>
-                </div>
-            `;
-            const grid = document.createElement('div');
-            grid.id = 'mergeFileGrid';
-            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3 p-3 bg-slate-100 dark:bg-slate-900 rounded-lg min-h-[120px]';
-            wrap.appendChild(grid);
-            container.appendChild(wrap);
-            renderMergeCards();
-        }
-
         async function getMergeThumb(file) {
             if (mergeThumbCache.has(file)) return mergeThumbCache.get(file);
             let url = '';
@@ -1281,10 +1320,14 @@
             const grid = document.getElementById('mergeFileGrid');
             if (!grid) return;
             grid.innerHTML = '';
+            if (loadedFiles.length === 0) {
+                grid.innerHTML = '<span class="col-span-full text-xs text-slate-400">Select PDF files to merge.</span>';
+                return;
+            }
             const canDrag = isDesktopPointer();
             loadedFiles.forEach((file, idx) => {
                 const card = document.createElement('div');
-                card.className = 'page-preview-card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden shadow-sm';
+                card.className = 'page-preview-card relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden shadow-sm';
                 card.dataset.index = String(idx);
                 if (canDrag) {
                     card.draggable = true;
@@ -1298,21 +1341,18 @@
                 card.innerHTML = `
                     <div class="relative bg-slate-200 dark:bg-slate-700 aspect-[3/4] flex items-center justify-center overflow-hidden pointer-events-none">
                         <i class="fa-solid fa-file-pdf text-slate-300 dark:text-slate-600 text-2xl"></i>
-                        <img class="thumb absolute inset-0 w-full h-full object-contain bg-white hidden" alt="${escapeHtml(file.name)}">
+                        <img class="thumb w-full h-full object-contain bg-white hidden" alt="${escapeHtml(file.name)}">
                     </div>
-                    <span class="absolute top-1 left-1 w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>
-                    <button type="button" onclick="event.stopPropagation(); removeWorkspaceFile(${idx})" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 dark:bg-slate-900/90 text-slate-500 hover:text-red-500 shadow flex items-center justify-center">
-                        <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                    <div class="px-2 py-1.5">
-                        <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 truncate" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</p>
-                        <p class="text-[10px] text-slate-400">${(file.size/1024).toFixed(1)} KB</p>
+                    <div class="px-2 py-1.5 flex items-center justify-between gap-1">
+                        <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">${t('ws.pdfLabel').replace('{n}', idx + 1)}</span>
+                        <button type="button" onclick="event.stopPropagation(); removeWorkspaceFile(${idx})" class="w-6 h-6 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-slate-700 flex items-center justify-center">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
                     </div>
                 `;
-                card.classList.add('relative');
                 grid.appendChild(card);
                 getMergeThumb(file).then(url => {
-                    if (!url) return;
+                    if (!url || card.dataset.index !== String(idx)) return;
                     const img = card.querySelector('img.thumb');
                     if (img) { img.src = url; img.classList.remove('hidden'); }
                 });
@@ -1428,6 +1468,59 @@
             }
         }
 
+        function yieldToUI() {
+            return new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+        }
+
+        function showWorkspaceBusy(mode) {
+            const overlay = document.getElementById('wsBusyOverlay');
+            const spinner = document.getElementById('wsBusySpinner');
+            const barWrap = document.getElementById('wsBusyBarWrap');
+            const title = document.getElementById('wsBusyTitle');
+            const sub = document.getElementById('wsBusySub');
+            if (!overlay) return;
+            overlay.style.display = 'flex';
+            if (spinner) spinner.style.display = 'block';
+            if (mode === 'compress') {
+                if (barWrap) barWrap.style.display = 'block';
+                if (title) title.innerText = t('busy.compress');
+                if (sub) sub.innerText = t('busy.compressSub');
+                setBusyProgress(1, t('processing'));
+            } else {
+                if (barWrap) barWrap.style.display = 'none';
+                if (title) title.innerText = t('processing');
+                if (sub) sub.innerText = t('busy.wait');
+            }
+        }
+
+        function hideWorkspaceBusy() {
+            const overlay = document.getElementById('wsBusyOverlay');
+            if (overlay) overlay.style.display = 'none';
+            const fill = document.getElementById('wsBusyBarFill');
+            if (fill) fill.style.width = '0%';
+            const barWrap = document.getElementById('wsBusyBarWrap');
+            if (barWrap) barWrap.style.display = 'none';
+        }
+
+        function setBusyStatus(titleText, subText) {
+            const title = document.getElementById('wsBusyTitle');
+            const sub = document.getElementById('wsBusySub');
+            if (title && titleText) title.innerText = titleText;
+            if (sub && subText) sub.innerText = subText;
+        }
+
+        function setBusyProgress(pct, label) {
+            const fill = document.getElementById('wsBusyBarFill');
+            const text = document.getElementById('wsBusyBarLabel');
+            const safe = Math.max(0, Math.min(100, Math.round(pct)));
+            if (fill) fill.style.width = safe + '%';
+            if (text) text.innerText = label ? (label + ' • ' + safe + '%') : (safe + '%');
+        }
+
+        function setCompressProgress(pct, label) {
+            setBusyProgress(pct, label);
+        }
+
         async function runToolAction() {
             if (loadedFiles.length === 0) {
                 alert(t('alert.noFile'));
@@ -1438,6 +1531,9 @@
             const origHtml = btn.innerHTML;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${t('processing')}</span>`;
             btn.disabled = true;
+            showWorkspaceBusy(activeTool && activeTool.id === 'pdf-compress' ? 'compress' : 'process');
+            await yieldToUI();
+            await yieldToUI();
 
             try {
                 switch(activeTool.id) {
@@ -1465,6 +1561,7 @@
                 console.error(err);
                 alert(friendlyProcessError(err));
             } finally {
+                hideWorkspaceBusy();
                 btn.innerHTML = origHtml;
                 btn.disabled = false;
             }
@@ -1730,58 +1827,76 @@
             await saveAndDownloadPdf(outPdf, 'split_pages.pdf');
         }
 
-        async function rasterizePdfToJpegBytes(srcBytes, maxEdge, quality) {
-            const srcDoc = await pdfjsLib.getDocument({ data: srcBytes.slice() }).promise;
-            const outPdf = await PDFLib.PDFDocument.create();
+        async function loadPdfJsDocument(bytes) {
+            const data = bytes.slice();
+            try {
+                return await pdfjsLib.getDocument({
+                    data,
+                    disableAutoFetch: true,
+                    disableStream: true,
+                    isEvalSupported: false
+                }).promise;
+            } catch (err) {
+                return await pdfjsLib.getDocument({
+                    data: bytes.slice(),
+                    disableWorker: true,
+                    disableAutoFetch: true,
+                    disableStream: true
+                }).promise;
+            }
+        }
 
-            for (let i = 1; i <= srcDoc.numPages; i++) {
+        async function rasterizePdfToJpegBytes(srcBytes, maxEdge, quality, onProgress) {
+            const srcDoc = await loadPdfJsDocument(srcBytes);
+            const outPdf = await PDFLib.PDFDocument.create();
+            const total = srcDoc.numPages;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { alpha: false });
+
+            for (let i = 1; i <= total; i++) {
                 const page = await srcDoc.getPage(i);
                 const base = page.getViewport({ scale: 1 });
                 const longest = Math.max(base.width, base.height) || 1;
-                const scale = Math.max(0.16, Math.min(1.2, maxEdge / longest));
+                const scale = Math.max(0.08, Math.min(0.7, maxEdge / longest));
                 const viewport = page.getViewport({ scale });
-                const canvas = document.createElement('canvas');
                 canvas.width = Math.max(1, Math.round(viewport.width));
                 canvas.height = Math.max(1, Math.round(viewport.height));
-                const ctx = canvas.getContext('2d', { alpha: false });
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 await page.render({ canvasContext: ctx, viewport }).promise;
                 const jpegBytes = await canvasToArrayBuffer(canvas, 'image/jpeg', quality);
-                canvas.width = 0;
-                canvas.height = 0;
                 const image = await outPdf.embedJpg(jpegBytes);
                 const pdfPage = outPdf.addPage([image.width, image.height]);
                 pdfPage.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+                if (typeof page.cleanup === 'function') page.cleanup();
+                if (onProgress) await onProgress(i, total);
             }
 
+            canvas.width = 0;
+            canvas.height = 0;
+            if (typeof srcDoc.cleanup === 'function') srcDoc.cleanup();
             return outPdf.save({ useObjectStreams: true });
         }
 
         async function processPDFCompress() {
             const file = loadedFiles[0];
+            if (!file) throw new Error(t('alert.noFile'));
             const level = (document.getElementById('optCompressLevel') || {}).value || 'high';
-            const targetBytes = 10 * 1024 * 1024;
+            const sizeMb = file.size / (1024 * 1024);
             const presets = {
-                low: { maxEdge: 1800, quality: 0.75 },
-                medium: { maxEdge: 1100, quality: 0.48 },
-                high: { maxEdge: 720, quality: 0.30 }
+                low: { maxEdge: 1100, quality: 0.50 },
+                medium: { maxEdge: 720, quality: 0.32 },
+                high: { maxEdge: sizeMb >= 80 ? 320 : 420, quality: 0.18 }
             };
-            const extraPasses = [
-                { maxEdge: 540, quality: 0.22 },
-                { maxEdge: 400, quality: 0.16 }
-            ];
             const srcBytes = new Uint8Array(await file.arrayBuffer());
-            let cfg = presets[level] || presets.high;
-            let outBytes = await rasterizePdfToJpegBytes(srcBytes, cfg.maxEdge, cfg.quality);
-
-            if (level === 'high') {
-                for (let i = 0; i < extraPasses.length && outBytes.length > targetBytes; i++) {
-                    cfg = extraPasses[i];
-                    outBytes = await rasterizePdfToJpegBytes(srcBytes, cfg.maxEdge, cfg.quality);
-                }
-            }
-
+            const cfg = presets[level] || presets.high;
+            setCompressProgress(2, t('processing'));
+            setBusyStatus(t('busy.compress'), t('busy.compressSub'));
+            const outBytes = await rasterizePdfToJpegBytes(srcBytes, cfg.maxEdge, cfg.quality, async (page, total) => {
+                setCompressProgress((page / total) * 100, t('busy.page').replace('{n}', page).replace('{t}', total));
+                await yieldToUI();
+            });
+            setCompressProgress(100, t('processing'));
             downloadBlob(new Blob([outBytes], { type: 'application/pdf' }), 'compressed_document.pdf');
         }
 
