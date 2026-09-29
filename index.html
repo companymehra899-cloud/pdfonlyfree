@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="app-build" content="20260928-compress-fix">
+    <meta name="app-build" content="20260929-ui-white-bg">
     <title>ePDFConverter - Modern PDF & Image Utility Suite</title>
     
     <!-- Tailwind CSS -->
@@ -18,11 +18,11 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
                         }
                     }
                 }
@@ -43,9 +43,22 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', 'Noto Sans Arabic', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif; }
         html[dir="rtl"] .nav-dropdown { left: auto; right: 0; }
+        .page-shell {
+            background-color: #ffffff;
+            background-image: none;
+        }
+        .dark .page-shell {
+            background-color: #0c0a09;
+            background-image:
+                radial-gradient(900px 420px at 12% -8%, rgba(249, 115, 22, 0.18), transparent 58%),
+                radial-gradient(720px 380px at 92% 0%, rgba(6, 182, 212, 0.12), transparent 52%),
+                linear-gradient(rgba(68, 64, 60, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(68, 64, 60, 0.4) 1px, transparent 1px);
+            background-size: auto, auto, 48px 48px, 48px 48px;
+        }
         
         /* Custom scrollbars */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -54,21 +67,35 @@
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(226, 232, 240, 0.7);
         }
         .dark .glass-panel {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(51, 65, 85, 0.8);
+            background: rgba(2, 6, 23, 0.78);
+            border: 1px solid rgba(51, 65, 85, 0.7);
         }
 
         .tool-card {
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #f97316, #06b6d4);
+            opacity: 0;
+            transition: opacity 0.22s ease;
         }
         .tool-card:hover {
             transform: translateY(-4px);
+            box-shadow: 0 18px 40px -18px rgba(249, 115, 22, 0.35);
         }
+        .tool-card:hover::before { opacity: 1; }
 
         .nav-dropdown {
             opacity: 0;
@@ -103,7 +130,7 @@
             cursor: grabbing;
         }
         .page-preview-card.drag-over {
-            outline: 2px solid #3b82f6;
+            outline: 2px solid #f97316;
             outline-offset: 2px;
             transform: translateY(-2px);
         }
@@ -114,7 +141,7 @@
             width: 100%;
             height: 6px;
             border-radius: 9999px;
-            background: #c7d2fe;
+            background: #fed7aa;
             outline: none;
         }
         .dark .kb-slider {
@@ -126,16 +153,16 @@
             width: 18px;
             height: 18px;
             border-radius: 9999px;
-            background: #4f46e5;
+            background: #ea580c;
             cursor: pointer;
             border: 0;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+            box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.18);
         }
         .kb-slider::-moz-range-thumb {
             width: 18px;
             height: 18px;
             border-radius: 9999px;
-            background: #4f46e5;
+            background: #ea580c;
             cursor: pointer;
             border: 0;
         }
@@ -151,7 +178,7 @@
             height: 100%;
             width: 0%;
             border-radius: 9999px;
-            background: linear-gradient(90deg, #2563eb, #4f46e5);
+            background: linear-gradient(90deg, #f97316, #06b6d4);
             transition: width 0.2s ease;
         }
         @keyframes ws-spin {
@@ -162,85 +189,89 @@
             height: 56px;
             border-radius: 9999px;
             border: 5px solid rgba(148, 163, 184, 0.35);
-            border-top-color: #2563eb;
+            border-top-color: #f97316;
             animation: ws-spin 0.8s linear infinite;
         }
 
         .nav-btn.active-nav {
-            background: #eff6ff !important;
-            color: #2563eb !important;
+            background: #ea580c !important;
+            color: #ffffff !important;
+            box-shadow: 0 8px 20px -12px rgba(234, 88, 12, 0.8);
         }
         .dark .nav-btn.active-nav {
-            background: rgba(30, 58, 138, 0.3) !important;
-            color: #60a5fa !important;
+            background: #fb923c !important;
+            color: #1c1917 !important;
         }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200">
+<body class="page-shell bg-white dark:bg-stone-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200">
 
     <!-- Navigation Bar -->
-    <header class="sticky top-0 z-40 w-full glass-panel border-b border-slate-200 dark:border-slate-800 transition-colors">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+    <header class="sticky top-0 z-40 w-full glass-panel border-b border-slate-200/70 dark:border-slate-800 transition-colors">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-[72px] gap-4">
                 
                 <!-- Logo -->
-                <div class="flex items-center space-x-2 sm:space-x-3 cursor-pointer min-w-0" onclick="resetToHome()">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
-                        <i class="fa-solid fa-file-pdf text-xl"></i>
+                <div class="flex items-center space-x-3 cursor-pointer min-w-0" onclick="resetToHome()">
+                    <div class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30 shrink-0">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <path d="M14 2v6h6"/>
+                            <path d="M8 13h8M8 17h5"/>
+                        </svg>
                     </div>
                     <div class="min-w-0">
-                        <span class="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent whitespace-nowrap">ePDFConverter</span>
-                        <span data-i18n="tagline" class="text-[10px] block font-medium tracking-wider text-slate-500 dark:text-slate-400 -mt-1">100% PRIVATE & FAST</span>
+                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-950 dark:text-white whitespace-nowrap">ePDFConverter</span>
+                        <span data-i18n="tagline" class="text-[10px] block font-semibold tracking-[0.18em] text-slate-400 dark:text-slate-500 -mt-0.5">100% PRIVATE & FAST</span>
                     </div>
                 </div>
 
                 <!-- Category Links (Desktop) -->
-                <nav class="hidden lg:flex space-x-1 font-medium text-sm">
+                <nav class="hidden lg:flex items-center gap-1 p-1 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800">
                     <div class="nav-dropdown-wrap relative">
-                        <button onclick="filterCategory('all')" data-cat="all" class="nav-btn active-nav px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 inline-flex items-center gap-1.5">
+                        <button onclick="filterCategory('all')" data-cat="all" class="nav-btn active-nav px-4 py-2 rounded-xl hover:bg-white/80 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 inline-flex items-center gap-1.5 text-sm font-semibold">
                             <span data-i18n="nav.allTools">All Tools</span>
                             <i class="fa-solid fa-chevron-down text-[10px]"></i>
                         </button>
                         <div class="nav-dropdown absolute left-0 top-full pt-2 w-[540px] z-50">
-                            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-3">
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-3">
                                 <div id="navToolsDropdown" class="grid grid-cols-2 gap-1 max-h-[70vh] overflow-y-auto"></div>
                             </div>
                         </div>
                     </div>
-                    <button onclick="filterCategory('pdf')" data-cat="pdf" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"><span data-i18n="nav.pdfTools">PDF Tools</span></button>
-                    <button onclick="filterCategory('image')" data-cat="image" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"><span data-i18n="nav.imageUtils">Image Utilities</span></button>
-                    <button onclick="filterCategory('convert')" data-cat="convert" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"><span data-i18n="nav.converters">Converters</span></button>
+                    <button onclick="filterCategory('pdf')" data-cat="pdf" class="nav-btn px-4 py-2 rounded-xl hover:bg-white/80 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-semibold"><span data-i18n="nav.pdfTools">PDF Tools</span></button>
+                    <button onclick="filterCategory('image')" data-cat="image" class="nav-btn px-4 py-2 rounded-xl hover:bg-white/80 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-semibold"><span data-i18n="nav.imageUtils">Image Utilities</span></button>
+                    <button onclick="filterCategory('convert')" data-cat="convert" class="nav-btn px-4 py-2 rounded-xl hover:bg-white/80 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-semibold"><span data-i18n="nav.converters">Converters</span></button>
                 </nav>
 
                 <!-- Search Bar & Controls -->
-                <div class="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
-                    <div class="relative hidden lg:block w-48 xl:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                    <div class="relative hidden lg:block w-44 xl:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
                         <input type="text" id="searchInput" oninput="handleSearch(this)" placeholder="Search tools... (Ctrl+K)" 
-                               class="w-full pl-9 pr-8 py-1.5 text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <span class="absolute right-2.5 top-2 text-[10px] font-semibold text-slate-400 bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded">/</span>
+                               class="w-full pl-10 pr-10 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <span class="absolute right-3 top-2.5 text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-md">/</span>
                     </div>
 
                     <div class="nav-dropdown-wrap relative" id="langWrap">
-                        <button type="button" onclick="toggleLangMenu(event)" class="px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 hover:border-blue-500 hover:text-blue-600 transition-colors inline-flex items-center gap-1.5" title="Language">
+                        <button type="button" onclick="toggleLangMenu(event)" class="px-3 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-200 hover:border-orange-400 hover:text-orange-600 transition-colors inline-flex items-center gap-1.5" title="Language">
                             <i class="fa-solid fa-globe text-base"></i>
                             <span id="langLabel" class="text-xs font-bold">EN</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                         </button>
                         <div class="nav-dropdown absolute right-0 top-full pt-2 w-48 z-50">
-                            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-1.5">
-                                <button type="button" onclick="setLanguage('en')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left hover:bg-blue-50 dark:hover:bg-slate-700">English</button>
-                                <button type="button" onclick="setLanguage('ar')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left hover:bg-blue-50 dark:hover:bg-slate-700">العربية</button>
-                                <button type="button" onclick="setLanguage('fr')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left hover:bg-blue-50 dark:hover:bg-slate-700">Français</button>
-                                <button type="button" onclick="setLanguage('es')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left hover:bg-blue-50 dark:hover:bg-slate-700">Español</button>
-                                <button type="button" onclick="setLanguage('de')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left hover:bg-blue-50 dark:hover:bg-slate-700">Deutsch</button>
-                                <button type="button" onclick="setLanguage('nl')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left hover:bg-blue-50 dark:hover:bg-slate-700">Nederlands</button>
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-1.5">
+                                <button type="button" onclick="setLanguage('en')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left hover:bg-orange-50 dark:hover:bg-slate-800">English</button>
+                                <button type="button" onclick="setLanguage('ar')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left hover:bg-orange-50 dark:hover:bg-slate-800">العربية</button>
+                                <button type="button" onclick="setLanguage('fr')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left hover:bg-orange-50 dark:hover:bg-slate-800">Français</button>
+                                <button type="button" onclick="setLanguage('es')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left hover:bg-orange-50 dark:hover:bg-slate-800">Español</button>
+                                <button type="button" onclick="setLanguage('de')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left hover:bg-orange-50 dark:hover:bg-slate-800">Deutsch</button>
+                                <button type="button" onclick="setLanguage('nl')" class="lang-opt w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left hover:bg-orange-50 dark:hover:bg-slate-800">Nederlands</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Dark Mode Toggle -->
-                    <button onclick="toggleDarkMode()" class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle theme">
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:border-orange-400 transition-colors" title="Toggle theme">
                         <i class="fa-solid fa-moon dark:hidden text-lg"></i>
                         <i class="fa-solid fa-sun hidden dark:inline text-lg text-amber-400"></i>
                     </button>
@@ -248,68 +279,102 @@
             </div>
 
             <!-- Mobile Toolbar (search + category chips) -->
-            <div class="lg:hidden pb-3 space-y-2">
+            <div class="lg:hidden pb-4 space-y-2">
                 <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
                     <input type="text" id="mobileSearchInput" oninput="handleSearch(this)" placeholder="Search tools..."
-                           class="w-full pl-9 pr-3 py-2 text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full pl-10 pr-3 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
                 <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-                    <button onclick="filterCategory('all')" data-cat="all" data-i18n="nav.allTools" class="nav-btn active-nav shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">All Tools</button>
-                    <button onclick="filterCategory('pdf')" data-cat="pdf" data-i18n="nav.pdfTools" class="nav-btn shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">PDF Tools</button>
-                    <button onclick="filterCategory('image')" data-cat="image" data-i18n="nav.imageUtils" class="nav-btn shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Image Utilities</button>
-                    <button onclick="filterCategory('convert')" data-cat="convert" data-i18n="nav.converters" class="nav-btn shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Converters</button>
+                    <button onclick="filterCategory('all')" data-cat="all" data-i18n="nav.allTools" class="nav-btn active-nav shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">All Tools</button>
+                    <button onclick="filterCategory('pdf')" data-cat="pdf" data-i18n="nav.pdfTools" class="nav-btn shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">PDF Tools</button>
+                    <button onclick="filterCategory('image')" data-cat="image" data-i18n="nav.imageUtils" class="nav-btn shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Image Utilities</button>
+                    <button onclick="filterCategory('convert')" data-cat="convert" data-i18n="nav.converters" class="nav-btn shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Converters</button>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-14">
         
         <!-- Hero Section -->
-        <div id="heroSection" class="text-center pt-3 pb-5 sm:pt-4 sm:pb-6 px-2 sm:px-4">
-            <span id="heroBadge" class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 mb-2 border border-blue-200 dark:border-blue-800">
-                <i class="fa-solid fa-shield-halved"></i> <span data-i18n="hero.badge">100% Client-Side Processing • Your files never leave your browser</span>
-            </span>
-            <h1 id="heroTitle" class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight max-w-3xl mx-auto leading-tight"></h1>
-            <p id="heroSubtitle" class="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-                Resize to exact KB/DPI, merge, split, watermark, sign, and convert documents locally with zero upload limits and complete privacy.
-            </p>
+        <div id="heroSection" class="relative pt-2 pb-10 sm:pt-4 sm:pb-14 px-1">
+            <div class="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 lg:gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <span id="heroBadge" class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-full bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-200 mb-5 border border-orange-100 dark:border-slate-700 shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span data-i18n="hero.badge">100% Client-Side Processing • Your files never leave your browser</span>
+                    </span>
+                    <h1 id="heroTitle" class="text-4xl sm:text-6xl font-extrabold text-slate-950 dark:text-white tracking-tight max-w-4xl mx-auto lg:mx-0 leading-[1.08]"></h1>
+                    <p id="heroSubtitle" class="mt-5 text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        Resize to exact KB/DPI, merge, split, watermark, sign, and convert documents locally with zero upload limits and complete privacy.
+                    </p>
+                    <div class="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-orange-100 dark:border-slate-800"><i class="fa-solid fa-lock text-emerald-500"></i> No upload</span>
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-orange-100 dark:border-slate-800"><i class="fa-solid fa-bolt text-orange-500"></i> Instant</span>
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-orange-100 dark:border-slate-800"><i class="fa-solid fa-mobile-screen text-cyan-500"></i> Works offline</span>
+                    </div>
+                </div>
 
+                <div class="relative mx-auto w-full max-w-md lg:max-w-none" aria-hidden="true">
+                    <div class="absolute -top-6 -left-4 w-28 h-28 rounded-full bg-orange-200/70 dark:bg-orange-500/10 blur-2xl"></div>
+                    <div class="absolute -bottom-8 -right-4 w-32 h-32 rounded-full bg-cyan-200/70 dark:bg-cyan-500/10 blur-2xl"></div>
+                    <svg class="relative w-full h-auto drop-shadow-xl" viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="36" y="48" width="250" height="268" rx="28" class="fill-white dark:fill-slate-900 stroke-orange-100 dark:stroke-slate-700" stroke-width="2"/>
+                        <rect x="64" y="78" width="120" height="14" rx="7" class="fill-orange-200 dark:fill-orange-500/40"/>
+                        <rect x="64" y="108" width="194" height="10" rx="5" class="fill-slate-200 dark:fill-slate-700"/>
+                        <rect x="64" y="128" width="168" height="10" rx="5" class="fill-slate-200 dark:fill-slate-700"/>
+                        <rect x="64" y="148" width="184" height="10" rx="5" class="fill-slate-200 dark:fill-slate-700"/>
+                        <rect x="64" y="188" width="80" height="80" rx="16" class="fill-orange-50 dark:fill-orange-500/10 stroke-orange-200 dark:stroke-orange-500/30" stroke-width="2"/>
+                        <path d="M84 228h40M84 244h28" class="stroke-orange-400" stroke-width="6" stroke-linecap="round"/>
+                        <rect x="158" y="198" width="100" height="18" rx="9" class="fill-cyan-100 dark:fill-cyan-500/20"/>
+                        <rect x="158" y="226" width="88" height="18" rx="9" class="fill-orange-100 dark:fill-orange-500/20"/>
+                        <rect x="210" y="86" width="220" height="196" rx="28" class="fill-orange-500"/>
+                        <path d="M248 142h144M248 168h118M248 194h132" class="stroke-white/80" stroke-width="10" stroke-linecap="round"/>
+                        <circle cx="430" cy="118" r="28" class="fill-cyan-400"/>
+                        <path d="M418 118l8 8 16-16" class="stroke-white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="392" y="214" width="92" height="64" rx="18" class="fill-white dark:fill-slate-800 stroke-cyan-200 dark:stroke-cyan-500/40" stroke-width="2"/>
+                        <path d="M412 246h52M412 258h36" class="stroke-cyan-400" stroke-width="6" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
         </div>
 
         <!-- Tools Grid Section -->
-        <section id="toolsSection" class="mt-4">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-                <h2 id="categoryTitle" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-shapes text-blue-600"></i> All Tools
-                </h2>
-                <span id="toolCount" class="text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">15 Tools Available</span>
+        <section id="toolsSection" class="mt-2">
+            <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+                <div>
+                    <p class="text-[11px] font-bold tracking-[0.2em] uppercase text-orange-500 mb-1">Toolkit</p>
+                    <h2 id="categoryTitle" class="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white flex items-center gap-2">
+                        All Tools
+                    </h2>
+                </div>
+                <span id="toolCount" class="text-xs text-slate-500 dark:text-slate-400 font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full">15 Tools Available</span>
             </div>
 
             <!-- Grid Container -->
-            <div id="toolsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div id="toolsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 <!-- Cards injected via JavaScript -->
             </div>
         </section>
 
         <!-- Interactive Tool Workspace Modal -->
-        <div id="workspaceModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-stretch justify-center p-0">
-            <div class="relative bg-white dark:bg-slate-800 shadow-2xl w-full h-full max-w-none max-h-none flex flex-col overflow-hidden border-0">
+        <div id="workspaceModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-md flex items-stretch justify-center p-0 sm:p-6">
+            <div class="relative bg-white dark:bg-slate-950 shadow-2xl w-full h-full sm:max-w-5xl sm:h-auto sm:max-h-[92vh] sm:rounded-3xl flex flex-col overflow-hidden border-0 sm:border sm:border-slate-200 dark:sm:border-slate-800">
                 
                 <!-- Workspace Header -->
-                <div class="px-4 sm:px-8 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/80 shrink-0">
+                <div class="px-4 sm:px-8 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-white dark:bg-slate-950 shrink-0">
                     <div class="flex items-center space-x-3 min-w-0">
-                        <div id="wsToolIcon" class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg shrink-0">
+                        <div id="wsToolIcon" class="w-11 h-11 rounded-2xl bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-300 flex items-center justify-center text-lg shrink-0">
                             <i class="fa-solid fa-wrench"></i>
                         </div>
                         <div class="min-w-0">
-                            <h3 id="wsToolTitle" class="font-bold text-slate-900 dark:text-white text-base sm:text-lg leading-tight truncate">Tool Title</h3>
+                            <h3 id="wsToolTitle" class="font-extrabold text-slate-950 dark:text-white text-base sm:text-lg leading-tight truncate">Tool Title</h3>
                             <p id="wsToolDesc" class="text-xs text-slate-500 dark:text-slate-400 truncate">Tool description goes here</p>
                         </div>
                     </div>
-                    <button onclick="closeWorkspace()" class="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">
+                    <button onclick="closeWorkspace()" class="shrink-0 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
                         <i class="fa-solid fa-xmark text-xl"></i>
                     </button>
                 </div>
@@ -320,11 +385,11 @@
                 </div>
 
                 <!-- Workspace Footer -->
-                <div class="px-4 sm:px-8 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between shrink-0">
-                    <button onclick="closeWorkspace()" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                <div class="px-4 sm:px-8 py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center justify-between shrink-0">
+                    <button onclick="closeWorkspace()" class="px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-colors">
                         <span data-i18n="cancel">Cancel</span>
                     </button>
-                    <button id="wsActionBtn" onclick="runToolAction()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg shadow-lg shadow-blue-500/20 flex items-center space-x-2 transition-all">
+                    <button id="wsActionBtn" onclick="runToolAction()" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 dark:bg-orange-400 dark:text-stone-950 dark:hover:bg-orange-300 text-white font-semibold text-sm rounded-2xl shadow-lg shadow-orange-500/30 flex items-center space-x-2 transition-all">
                         <i class="fa-solid fa-gear"></i>
                         <span data-i18n="processDocument">Process Document</span>
                     </button>
@@ -349,10 +414,10 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 transition-colors">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-4">
+    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-950/80 py-7 transition-colors">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-4">
             <div class="text-center sm:text-left">
-                &copy; 2026 <span class="font-semibold text-slate-700 dark:text-slate-300">ePDFConverter</span>. <span data-i18n="footer.local">All processing happens 100% locally in your browser.</span>
+                &copy; 2026 <span class="font-bold text-slate-800 dark:text-slate-200">ePDFConverter</span>. <span data-i18n="footer.local">All processing happens 100% locally in your browser.</span>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-lock text-emerald-500"></i> <span data-i18n="footer.noUpload">No files uploaded</span></span>
@@ -753,7 +818,7 @@
 
             const heroTitle = document.getElementById('heroTitle');
             if (heroTitle) {
-                heroTitle.innerHTML = `${t('hero.title1')} <span class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">${t('hero.title2')}</span> ${t('hero.title3')}`;
+                heroTitle.innerHTML = `${t('hero.title1')} <span class="bg-gradient-to-r from-orange-500 via-amber-500 to-cyan-500 bg-clip-text text-transparent">${t('hero.title2')}</span> ${t('hero.title3')}`;
             }
             const heroSub = document.getElementById('heroSubtitle');
             if (heroSub) heroSub.innerText = t('hero.subtitle');
@@ -768,7 +833,7 @@
             const actionSpan = document.querySelector('#wsActionBtn span');
             if (actionSpan && !document.getElementById('wsActionBtn').disabled) actionSpan.innerText = t('processDocument');
 
-            document.getElementById('categoryTitle').innerHTML = `<i class="fa-solid fa-shapes text-blue-600"></i> ${t('cat.' + currentCategory)}`;
+            document.getElementById('categoryTitle').innerHTML = `${t('cat.' + currentCategory)}`;
             renderTools();
             renderNavDropdown();
             if (activeTool) {
@@ -805,6 +870,28 @@
             { id: 'convert-jpg-pdf', title: 'JPG/PNG to PDF', category: 'convert', icon: 'fa-file-pdf', desc: 'Convert single or multiple images into a seamless PDF.', accept: 'image/*', multiple: true },
             { id: 'convert-txt-pdf', title: 'Text/Word to PDF', category: 'convert', icon: 'fa-file-word', desc: 'Convert plain text (.txt) files or notes straight to PDF.', accept: '.txt,.text', multiple: false }
         ];
+
+        function toolVector(id) {
+            const wrap = (path) => `<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+            const icons = {
+                'pdf-merge': wrap('<rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/><path d="M8 12h8"/>'),
+                'pdf-split': wrap('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 4v16M8 12h8"/>'),
+                'pdf-compress': wrap('<path d="M8 4h8v4H8z"/><path d="M6 8h12v12H6z"/><path d="M9 14h6M10 17h4"/>'),
+                'pdf-rotate': wrap('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>'),
+                'pdf-delete-pages': wrap('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 10l6 6M15 10l-6 6"/>'),
+                'pdf-reorder': wrap('<path d="M7 6h10M7 12h10M7 18h10"/><path d="M4 9l3-3-3-3M20 21l-3-3 3-3"/>'),
+                'pdf-watermark': wrap('<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 16l8-8"/><circle cx="12" cy="12" r="3"/>'),
+                'pdf-signature': wrap('<path d="M4 18c2-6 4-8 6-8s2 4 4 4 4-8 6-10"/><path d="M4 20h16"/>'),
+                'pdf-to-img': wrap('<rect x="3" y="5" width="10" height="14" rx="2"/><rect x="13" y="8" width="8" height="8" rx="1.5"/><circle cx="16.5" cy="11" r="1"/>'),
+                'img-resizer': wrap('<rect x="4" y="8" width="10" height="10" rx="1.5"/><path d="M14 14h6v6h-6zM8 4h6v4"/>'),
+                'img-target-kb': wrap('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/>'),
+                'img-converter': wrap('<path d="M7 7h10v10H7z"/><path d="M4 12h3M17 12h3M12 4v3M12 17v3"/>'),
+                'img-watermark': wrap('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15l3-4 2 2 3-4 2 6"/>'),
+                'convert-jpg-pdf': wrap('<rect x="3" y="6" width="8" height="12" rx="1.5"/><path d="M13 12h8M17 8l4 4-4 4"/>'),
+                'convert-txt-pdf': wrap('<path d="M6 4h8l4 4v12H6z"/><path d="M14 4v4h4M8 12h8M8 16h5"/>')
+            };
+            return icons[id] || wrap('<rect x="5" y="3" width="14" height="18" rx="2"/>');
+        }
 
         window.onload = function() {
             initTheme();
@@ -854,7 +941,7 @@
                 btn.classList.toggle('active-nav', btn.dataset.cat === cat);
             });
 
-            document.getElementById('categoryTitle').innerHTML = `<i class="fa-solid fa-shapes text-blue-600"></i> ${t('cat.' + cat)}`;
+            document.getElementById('categoryTitle').innerHTML = `${t('cat.' + cat)}`;
             renderTools();
         }
 
@@ -898,17 +985,17 @@
 
             filtered.forEach(tool => {
                 const card = document.createElement('div');
-                card.className = "tool-card bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 cursor-pointer shadow-sm hover:shadow-lg transition-all flex flex-col justify-between";
+                card.className = "tool-card bg-white/90 dark:bg-slate-900/80 p-5 rounded-3xl border border-orange-100 dark:border-slate-800 hover:border-orange-300 dark:hover:border-orange-500/50 cursor-pointer shadow-sm flex flex-col justify-between backdrop-blur-sm";
                 card.onclick = () => openToolWorkspace(tool.id);
                 card.innerHTML = `
                     <div>
-                        <div class="w-11 h-11 rounded-lg bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl mb-4">
-                            <i class="fa-solid ${tool.icon}"></i>
+                        <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300 flex items-center justify-center mb-4">
+                            ${toolVector(tool.id)}
                         </div>
-                        <h3 class="font-bold text-slate-800 dark:text-white text-base mb-1.5">${toolTitle(tool)}</h3>
+                        <h3 class="font-extrabold text-slate-950 dark:text-white text-[15px] mb-1.5 tracking-tight">${toolTitle(tool)}</h3>
                         <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${toolDesc(tool)}</p>
                     </div>
-                    <div class="mt-5 flex items-center text-xs font-semibold text-blue-600 dark:text-blue-400 group">
+                    <div class="mt-5 flex items-center text-xs font-bold text-orange-600 dark:text-orange-300 group">
                         <span>${t('tools.open')}</span>
                         <i class="fa-solid fa-arrow-right ml-1.5 transition-transform group-hover:translate-x-1"></i>
                     </div>
@@ -924,11 +1011,11 @@
             toolsData.forEach(tool => {
                 const item = document.createElement('button');
                 item.type = 'button';
-                item.className = 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-left hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors';
+                item.className = 'flex items-center gap-2.5 px-3 py-2 rounded-xl text-left hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors';
                 item.onclick = () => openToolWorkspace(tool.id);
                 item.innerHTML = `
-                    <span class="w-8 h-8 rounded-md bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm shrink-0">
-                        <i class="fa-solid ${tool.icon}"></i>
+                    <span class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300 flex items-center justify-center shrink-0">
+                        ${toolVector(tool.id)}
                     </span>
                     <span class="min-w-0">
                         <span class="block text-xs font-semibold text-slate-800 dark:text-white truncate">${toolTitle(tool)}</span>
@@ -942,17 +1029,17 @@
         function handleDragOver(e) {
             e.preventDefault();
             const dz = document.getElementById('dropZone');
-            if (dz) dz.classList.add('border-blue-500', 'bg-blue-50/50');
+            if (dz) dz.classList.add('border-orange-500', 'bg-orange-50/50');
         }
         function handleDragLeave(e) {
             e.preventDefault();
             const dz = document.getElementById('dropZone');
-            if (dz) dz.classList.remove('border-blue-500', 'bg-blue-50/50');
+            if (dz) dz.classList.remove('border-orange-500', 'bg-orange-50/50');
         }
         function handleDrop(e) {
             e.preventDefault();
             const dz = document.getElementById('dropZone');
-            if (dz) dz.classList.remove('border-blue-500', 'bg-blue-50/50');
+            if (dz) dz.classList.remove('border-orange-500', 'bg-orange-50/50');
             if (e.dataTransfer.files.length > 0) {
                 autoSelectToolForFiles(e.dataTransfer.files);
             }
@@ -983,7 +1070,7 @@
             activeTool = toolsData.find(t => t.id === toolId);
             if (!activeTool) return;
 
-            document.getElementById('wsToolIcon').innerHTML = `<i class="fa-solid ${activeTool.icon}"></i>`;
+            document.getElementById('wsToolIcon').innerHTML = toolVector(activeTool.id);
             document.getElementById('wsToolTitle').innerText = toolTitle(activeTool);
             document.getElementById('wsToolDesc').innerText = toolDesc(activeTool);
 
@@ -1018,7 +1105,7 @@
             if (!isPagePreviewTool || !hasFiles) {
                 const fileUploadBox = document.createElement('div');
                 fileUploadBox.id = 'wsDropZone';
-                fileUploadBox.className = "relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-8 sm:p-12 text-center bg-gradient-to-b from-blue-50/60 to-white dark:from-slate-800 dark:to-slate-800/60 transition-all cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md";
+                fileUploadBox.className = "relative border-2 border-dashed border-orange-200 dark:border-slate-700 rounded-3xl p-8 sm:p-12 text-center bg-gradient-to-b from-orange-50/80 to-white dark:from-slate-900 dark:to-slate-950 transition-all cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-md";
                 fileUploadBox.onclick = (e) => {
                     if (e.target && e.target.id === 'wsFileInput') return;
                     const input = document.getElementById('wsFileInput');
@@ -1029,12 +1116,12 @@
                 fileUploadBox.addEventListener('drop', onWsDrop);
                 fileUploadBox.innerHTML = `
                     <input type="file" id="wsFileInput" accept="${activeTool.accept}" ${activeTool.multiple ? 'multiple' : ''} class="hidden" onchange="onWorkspaceFileChoose(event)">
-                    <div class="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <div class="w-16 h-16 rounded-2xl bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V6"/><path d="M8 10l4-4 4 4"/><path d="M4 18h16"/></svg>
                     </div>
-                    <p class="font-semibold text-slate-700 dark:text-slate-200 text-sm sm:text-base">${t('ws.dragTitle')}</p>
+                    <p class="font-semibold text-slate-800 dark:text-slate-200 text-sm sm:text-base">${t('ws.dragTitle')}</p>
                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${t('ws.dragSub')}</p>
-                    <span class="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-lg shadow-blue-500/20 transition-colors">
+                    <span class="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-2xl shadow-lg shadow-orange-500/20 transition-colors">
                         <i class="fa-solid fa-folder-open"></i> ${activeTool.multiple ? t('ws.chooseFiles') : t('ws.chooseFile')}
                     </span>
                     <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-3">${hasFiles ? t('ws.selected').replace('{n}', loadedFiles.length) : t('ws.selectFile')}</p>
@@ -1048,7 +1135,7 @@
                     loadedFiles.forEach((f, idx) => {
                         fileListDiv.innerHTML += `
                             <span class="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300">
-                                <i class="fa-solid fa-file text-blue-500"></i> ${escapeHtml(f.name)} (${(f.size/1024).toFixed(1)} KB)
+                                <i class="fa-solid fa-file text-orange-500"></i> ${escapeHtml(f.name)} (${(f.size/1024).toFixed(1)} KB)
                                 <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 cursor-pointer" onclick="removeWorkspaceFile(${idx})"></i>
                             </span>
                         `;
@@ -1063,7 +1150,7 @@
                         <i class="fa-solid fa-file-pdf text-red-500"></i> ${t('ws.mergeSelected').replace('{n}', loadedFiles.length)}
                     </span>
                     <input type="file" id="wsFileInput" accept="${activeTool.accept}" multiple class="hidden" onchange="onWorkspaceFileChoose(event)">
-                    <button onclick="document.getElementById('wsFileInput').click()" class="shrink-0 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                    <button onclick="document.getElementById('wsFileInput').click()" class="shrink-0 text-xs font-semibold text-orange-600 dark:text-orange-300 hover:underline">
                         <i class="fa-solid fa-plus mr-1"></i>${t('ws.addFiles')}
                     </button>
                 `;
@@ -1076,7 +1163,7 @@
                         <i class="fa-solid fa-file-pdf text-red-500"></i> ${escapeHtml(loadedFiles[0].name)} (${(loadedFiles[0].size/1024).toFixed(1)} KB)
                     </span>
                     <input type="file" id="wsFileInput" accept="${activeTool.accept}" class="hidden" onchange="onWorkspaceFileChoose(event)">
-                    <button onclick="document.getElementById('wsFileInput').click()" class="shrink-0 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                    <button onclick="document.getElementById('wsFileInput').click()" class="shrink-0 text-xs font-semibold text-orange-600 dark:text-orange-300 hover:underline">
                         <i class="fa-solid fa-arrows-rotate mr-1"></i>${t('ws.changeFile')}
                     </button>
                 `;
@@ -1211,16 +1298,16 @@
                 optionsDiv.innerHTML = `
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">${t('opt.kb.label')}</label>
                     <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                        <button type="button" onclick="setTargetKB(20)" class="kb-preset p-2 text-center text-xs border rounded-lg hover:border-blue-500 font-semibold">20 KB</button>
-                        <button type="button" onclick="setTargetKB(50)" class="kb-preset p-2 text-center text-xs border rounded-lg hover:border-blue-500 font-semibold border-blue-500 text-blue-600">50 KB</button>
-                        <button type="button" onclick="setTargetKB(100)" class="kb-preset p-2 text-center text-xs border rounded-lg hover:border-blue-500 font-semibold">100 KB</button>
-                        <button type="button" onclick="setTargetKB(200)" class="kb-preset p-2 text-center text-xs border rounded-lg hover:border-blue-500 font-semibold">200 KB</button>
-                        <button type="button" onclick="setTargetKB(500)" class="kb-preset p-2 text-center text-xs border rounded-lg hover:border-blue-500 font-semibold">500 KB</button>
+                        <button type="button" onclick="setTargetKB(20)" class="kb-preset p-2 text-center text-xs border rounded-xl hover:border-orange-500 font-semibold">20 KB</button>
+                        <button type="button" onclick="setTargetKB(50)" class="kb-preset p-2 text-center text-xs border rounded-xl hover:border-orange-500 font-semibold border-orange-500 text-orange-600">50 KB</button>
+                        <button type="button" onclick="setTargetKB(100)" class="kb-preset p-2 text-center text-xs border rounded-xl hover:border-orange-500 font-semibold">100 KB</button>
+                        <button type="button" onclick="setTargetKB(200)" class="kb-preset p-2 text-center text-xs border rounded-xl hover:border-orange-500 font-semibold">200 KB</button>
+                        <button type="button" onclick="setTargetKB(500)" class="kb-preset p-2 text-center text-xs border rounded-xl hover:border-orange-500 font-semibold">500 KB</button>
                     </div>
-                    <div class="mt-4 rounded-2xl bg-indigo-50 dark:bg-slate-900/80 border border-indigo-100 dark:border-slate-700 px-4 py-4">
+                    <div class="mt-4 rounded-2xl bg-orange-50 dark:bg-slate-900/80 border border-orange-100 dark:border-slate-700 px-4 py-4">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-sm font-medium text-slate-700 dark:text-slate-200">${t('opt.kb.limit')}</span>
-                            <span id="optTargetKBLabel" class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-slate-700 text-indigo-700 dark:text-indigo-300">50 KB</span>
+                            <span id="optTargetKBLabel" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-100 dark:bg-slate-700 text-orange-700 dark:text-orange-300">50 KB</span>
                         </div>
                         <input type="range" id="optTargetKBSlider" min="10" max="1000" step="1" value="50" class="kb-slider" oninput="onTargetKBSlider(this.value)">
                     </div>
@@ -1261,19 +1348,19 @@
         function onWsDragOver(e) {
             e.preventDefault();
             const zone = document.getElementById('wsDropZone');
-            if (zone) zone.classList.add('border-blue-500', 'bg-blue-50/70', 'dark:bg-slate-700/50');
+            if (zone) zone.classList.add('border-orange-500', 'bg-orange-50/70', 'dark:bg-slate-800/50');
         }
 
         function onWsDragLeave(e) {
             e.preventDefault();
             const zone = document.getElementById('wsDropZone');
-            if (zone) zone.classList.remove('border-blue-500', 'bg-blue-50/70', 'dark:bg-slate-700/50');
+            if (zone) zone.classList.remove('border-orange-500', 'bg-orange-50/70', 'dark:bg-slate-800/50');
         }
 
         function onWsDrop(e) {
             e.preventDefault();
             const zone = document.getElementById('wsDropZone');
-            if (zone) zone.classList.remove('border-blue-500', 'bg-blue-50/70', 'dark:bg-slate-700/50');
+            if (zone) zone.classList.remove('border-orange-500', 'bg-orange-50/70', 'dark:bg-slate-800/50');
             if (!e.dataTransfer || e.dataTransfer.files.length === 0) return;
             const incoming = filterAcceptedFiles(Array.from(e.dataTransfer.files), activeTool);
             if (incoming.length === 0) {
@@ -1402,9 +1489,9 @@
             if (slider && !fromSlider) slider.value = value;
             if (label) label.innerText = `${value} KB`;
             document.querySelectorAll('.kb-preset').forEach(btn => {
-                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.remove('border-orange-500', 'text-orange-600');
                 const preset = parseInt(btn.innerText, 10);
-                if (preset === value) btn.classList.add('border-blue-500', 'text-blue-600');
+                if (preset === value) btn.classList.add('border-orange-500', 'text-orange-600');
             });
         }
 
@@ -1696,11 +1783,11 @@
                         <img src="${pagePreviewCache[pageIndex] || ''}" alt="Page ${pageIndex + 1}" class="w-full h-full object-contain bg-white">
                     </div>
                     <div class="flex items-center justify-between px-2 py-1.5">
-                        <button type="button" onclick="event.stopPropagation(); moveReorderPage(${pos}, -1)" class="w-7 h-7 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 ${pos === 0 ? 'opacity-30 pointer-events-none' : ''}">
+                        <button type="button" onclick="event.stopPropagation(); moveReorderPage(${pos}, -1)" class="w-7 h-7 rounded-md text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-700 ${pos === 0 ? 'opacity-30 pointer-events-none' : ''}">
                             <i class="fa-solid fa-arrow-left text-xs"></i>
                         </button>
                         <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">${t('page.label').replace('{n}', pageIndex + 1)}</span>
-                        <button type="button" onclick="event.stopPropagation(); moveReorderPage(${pos}, 1)" class="w-7 h-7 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 ${pos === reorderPageOrder.length - 1 ? 'opacity-30 pointer-events-none' : ''}">
+                        <button type="button" onclick="event.stopPropagation(); moveReorderPage(${pos}, 1)" class="w-7 h-7 rounded-md text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-700 ${pos === reorderPageOrder.length - 1 ? 'opacity-30 pointer-events-none' : ''}">
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </button>
                     </div>
