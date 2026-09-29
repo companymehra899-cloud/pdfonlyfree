@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+body { font-family: 'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif; }
+html[dir="rtl"] .nav-dropdown { left: auto; right: 0; }
+.page-shell {
+    background-color: #ffffff;
+    background-image: none;
+}
+.dark .page-shell {
+    background-color: #0c0a09;
+    background-image:
+        radial-gradient(900px 420px at 12% -8%, rgba(249, 115, 22, 0.18), transparent 58%),
+        radial-gradient(720px 380px at 92% 0%, rgba(6, 182, 212, 0.12), transparent 52%),
+        linear-gradient(rgba(68, 64, 60, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(68, 64, 60, 0.4) 1px, transparent 1px);
+    background-size: auto, auto, 48px 48px, 48px 48px;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.dark ::-webkit-scrollbar-thumb { background: #475569; }
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(226, 232, 240, 0.7);
+}
+.dark .glass-panel {
+    background: rgba(2, 6, 23, 0.78);
+    border: 1px solid rgba(51, 65, 85, 0.7);
+}
+
+.tool-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+}
+.tool-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #f97316, #06b6d4);
+    opacity: 0;
+    transition: opacity 0.22s ease;
+}
+.tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px -18px rgba(249, 115, 22, 0.35);
+}
+.tool-card:hover::before { opacity: 1; }
+
+.nav-dropdown {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: all 0.18s ease;
+}
+.nav-dropdown-wrap:hover .nav-dropdown,
+.nav-dropdown-wrap:focus-within .nav-dropdown,
+.nav-dropdown-wrap.lang-open .nav-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.page-preview-card {
+    transition: all 0.2s ease;
+}
+.page-preview-card.marked-delete {
+    opacity: 0.45;
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
+}
+.page-preview-card.marked-delete img {
+    filter: grayscale(1);
+}
+.page-preview-card[draggable="true"] {
+    cursor: grab;
+}
+.page-preview-card.dragging {
+    opacity: 0.45;
+    cursor: grabbing;
+}
+.page-preview-card.drag-over {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+    transform: translateY(-2px);
+}
+
+.kb-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 9999px;
+    background: #fed7aa;
+    outline: none;
+}
+.dark .kb-slider {
+    background: #334155;
+}
+.kb-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    background: #ea580c;
+    cursor: pointer;
+    border: 0;
+    box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.18);
+}
+.kb-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    background: #ea580c;
+    cursor: pointer;
+    border: 0;
+}
+
+.ws-progress-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgba(148, 163, 184, 0.35);
+    overflow: hidden;
+}
+.ws-progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #f97316, #06b6d4);
+    transition: width 0.2s ease;
+}
+@keyframes ws-spin {
+    to { transform: rotate(360deg); }
+}
+.ws-spinner {
+    width: 56px;
+    height: 56px;
+    border-radius: 9999px;
+    border: 5px solid rgba(148, 163, 184, 0.35);
+    border-top-color: #f97316;
+    animation: ws-spin 0.8s linear infinite;
+}
+
+.nav-btn.active-nav {
+    background: #ea580c !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 20px -12px rgba(234, 88, 12, 0.8);
+}
+.dark .nav-btn.active-nav {
+    background: #fb923c !important;
+    color: #1c1917 !important;
+}
