@@ -492,7 +492,39 @@ window.onload = function() {
         const wrap = document.getElementById('langWrap');
         if (wrap && !wrap.contains(e.target)) wrap.classList.remove('lang-open');
     });
+
+    // Close mobile category menu when clicking outside
+    document.addEventListener('click', (e) => {
+        const wrap = document.getElementById('mobileMenuWrap');
+        if (wrap && !wrap.contains(e.target)) closeMobileMenu();
+    });
 };
+
+function toggleMobileMenu(event) {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById('mobileCategoryMenu');
+    const btn = document.getElementById('mobileMenuToggle');
+    if (!menu) return;
+    const isOpen = !menu.classList.contains('hidden');
+    menu.classList.toggle('hidden', isOpen);
+    if (btn) {
+        btn.setAttribute('aria-expanded', String(!isOpen));
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = !isOpen ? 'fa-solid fa-xmark text-lg' : 'fa-solid fa-bars text-lg';
+    }
+}
+
+function closeMobileMenu() {
+    const menu = document.getElementById('mobileCategoryMenu');
+    const btn = document.getElementById('mobileMenuToggle');
+    if (!menu || menu.classList.contains('hidden')) return;
+    menu.classList.add('hidden');
+    if (btn) {
+        btn.setAttribute('aria-expanded', 'false');
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-bars text-lg';
+    }
+}
 
 function toggleDarkMode() {
     const isDark = document.documentElement.classList.toggle('dark');
@@ -514,6 +546,7 @@ function filterCategory(cat) {
 
     document.getElementById('categoryTitle').innerHTML = `${t('cat.' + cat)}`;
     renderTools();
+    closeMobileMenu();
 }
 
 function handleSearch(source) {

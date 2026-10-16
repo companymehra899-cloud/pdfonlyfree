@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="app-build" content="20260929-seo">
+    <meta name="app-build" content="20261016-mobile-toggle">
     <title>ePDFConverter - Modern PDF & Image Utility Suite</title>
     <meta name="description" content="Free client-side PDF and image tools. Merge, split, compress, watermark, sign, and convert files locally in your browser. No uploads.">
     <meta name="robots" content="index, follow">
@@ -46,7 +46,7 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=20261016-mobile-toggle">
 </head>
 <body class="page-shell bg-white dark:bg-stone-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200">
 
@@ -122,18 +122,26 @@
                 </div>
             </div>
 
-            <!-- Mobile Toolbar (search + category chips) -->
-            <div class="lg:hidden pb-4 space-y-2">
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                    <input type="text" id="mobileSearchInput" oninput="handleSearch(this)" placeholder="Search tools..."
-                           class="w-full pl-10 pr-3 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <!-- Mobile Toolbar (search + toggle menu) -->
+            <div class="lg:hidden pb-4 space-y-2" id="mobileMenuWrap">
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                        <input type="text" id="mobileSearchInput" oninput="handleSearch(this)" placeholder="Search tools..."
+                               class="w-full pl-10 pr-3 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <button type="button" id="mobileMenuToggle" onclick="toggleMobileMenu(event)" aria-expanded="false" aria-controls="mobileCategoryMenu" title="Menu"
+                            class="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-orange-400 hover:text-orange-600 transition-colors">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
                 </div>
-                <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-                    <button onclick="filterCategory('all')" data-cat="all" data-i18n="nav.allTools" class="nav-btn active-nav shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">All Tools</button>
-                    <button onclick="filterCategory('pdf')" data-cat="pdf" data-i18n="nav.pdfTools" class="nav-btn shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">PDF Tools</button>
-                    <button onclick="filterCategory('image')" data-cat="image" data-i18n="nav.imageUtils" class="nav-btn shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Image Utilities</button>
-                    <button onclick="filterCategory('convert')" data-cat="convert" data-i18n="nav.converters" class="nav-btn shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Converters</button>
+                <div id="mobileCategoryMenu" class="hidden">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-1.5 space-y-1">
+                        <button onclick="filterCategory('all')" data-cat="all" data-i18n="nav.allTools" class="nav-btn active-nav w-full text-left px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-800">All Tools</button>
+                        <button onclick="filterCategory('pdf')" data-cat="pdf" data-i18n="nav.pdfTools" class="nav-btn w-full text-left px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-800">PDF Tools</button>
+                        <button onclick="filterCategory('image')" data-cat="image" data-i18n="nav.imageUtils" class="nav-btn w-full text-left px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-800">Image Utilities</button>
+                        <button onclick="filterCategory('convert')" data-cat="convert" data-i18n="nav.converters" class="nav-btn w-full text-left px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-800">Converters</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -270,7 +278,7 @@
         </div>
     </footer>
 
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=20261016-mobile-toggle"></script>
 
 </body>
 </html>
